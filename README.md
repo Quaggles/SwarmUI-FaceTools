@@ -12,11 +12,10 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 2. Open a cmd/terminal window in `SwarmUI\src\Extensions`
 3. Run `git clone https://github.com/Quaggles/SwarmUI-FaceTools.git`
 4. Run `SwarmUI\update-windows.bat` to recompile SwarmUI
-5. Launch SwarmUI as usual, if ReActor or CodeFormerCF nodes are installed you should see parameter groups for them in the generate tab
+5. Launch SwarmUI as usual, if ReActor or CodeFormerCF nodes are installed you should see parameter groups for them in the generate tab, if not follow the steps below.
 
-## Installing ReActor and CodeFormerCF Custom Nodes into ComfyUI
+## Installing ReActor and CodeFormerCF Custom Nodes into SwarmUI
 ### A. You are using the bundled ComfyUI installed by SwarmUI
-
 1. Drag any image into the prompt bar, in the parameters section click the "Install IP Adapter" button, this must be done before any other steps, if the button does not appear it's already installed ![image](https://github.com/user-attachments/assets/fcd63537-87e5-4ec1-af04-591b7566e684)
 2. Install [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager) if not already installed by opening a cmd/terminal window in `SwarmUI/dlbackend/comfy/ComfyUI/custom_nodes` and running `git clone https://github.com/ltdrdata/ComfyUI-Manager.git`
 3. Restart SwarmUI
