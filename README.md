@@ -21,12 +21,13 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 4. Open the 'Comfy Workflow' tab and click on the manager button and then 'Custom Nodes Manager': ![image](https://github.com/user-attachments/assets/878878c1-e498-4e3c-922b-72efe382fb12)
 5. In the Custom Nodes Manager find and install 'ReActor Node for ComfyUI' and/or 'Facerestore CF (Code Former)'
 6. Click the red restart button at the bottom of the window then go to your SwarmUI Server/Logs tab and set the view to ComfyUI to view the download/install progress, **this will take a while**
-7. When the logs show that the downloads have finished restart restart SwarmUI and the parameter groups should appear
+7. When the logs show that the downloads have finished restart SwarmUI and the parameter groups should appear
 
 ## Updating
 1. Shutdown SwarmUI
 2. Open a cmd/terminal window in `SwarmUI\src\Extensions\SwarmUI-FaceTools`
 3. Run `git pull`
+4. Run `SwarmUI\update-windows.bat` to recompile SwarmUI
 
 ## Usage
 
