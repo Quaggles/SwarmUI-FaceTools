@@ -27,7 +27,7 @@ These parameters inject different nodes to the workflow based on the options sel
 
 If `Face Image` is provided then face swap will be performed after image generation using the face/s in this image.
 
-If `Face Model` is set a saved Face Model is used to perform the face swap. Face Models can be created in the Comfy Workflow tab using the 'Save Face Model' node. Once the model is saved read this to ensure saved face models show up in the dropdown: [Model Paths for Face Restore and Fask Models](#model-paths-for-face-restore--and-fask-models), `Face Image` takes priority over `Face Model` if both are set.
+If `Face Model` is set a saved Face Model is used to perform the face swap. Face Models can be created in the Comfy Workflow tab using the 'Save Face Model' node. Once the model is saved read this to ensure saved face models show up in the dropdown: [Model Paths for Face Restore and Fask Models](#model-paths-for-face-restore-and-fask-models), `Face Image` takes priority over `Face Model` if both are set.
 
 If `Face Restore Model` is set then face restoration will be run after the face swap, if `Face Image` or `Face Model` were not provided it runs directly on the generated image similar to FaceRestoreCF. If this option is 'None' then face restoration is skipped.
 
@@ -41,7 +41,7 @@ Many more parameters are available if you enable 'Advanced Options' at the botto
 
 ### FaceRestoreCF
 
-FaceRestoreCF does not automatically download the model, you will need to download it manually [from here](https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth) rename it to `codeformer-v0.1.0.pth` and then read this about where to place it: [Model Paths for Face Restore and Fask Models](#model-paths-for-face-restore--and-fask-models)
+FaceRestoreCF does not automatically download the model, you will need to download it manually [from here](https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth) rename it to `codeformer-v0.1.0.pth` and then read this about where to place it: [Model Paths for Face Restore and Fask Models](#model-paths-for-face-restore-and-fask-models)
 
 Just make sure the parameter group is enabled and that `Face Restore Model` is set and it should work, you can also use 'Comfy Workflow/Import From Generate Tab' feature to see what the parameters are doing in the workflow.
 
