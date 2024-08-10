@@ -137,7 +137,7 @@ public class ReactorExtension : Extension
             "Download from <a href=\"https://github.com/hben35096/assets/releases/\">https://github.com/hben35096/assets/releases/</a>",
             faceMaskModelHelper.GetDefault(),
             IgnoreIf: faceMaskModelHelper.NullValue, 
-            FeatureFlag: "yolov8", 
+            FeatureFlag: FeatureReactor, 
             Group: reactorGroup, 
             GetValues: _ => faceMaskModelHelper.GetValues(), 
             OrderPriority: orderCounter++
