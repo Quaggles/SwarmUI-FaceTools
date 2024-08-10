@@ -75,4 +75,8 @@ After installing a model make sure to click the model refresh button in SwarmUI 
 
 ### I can't see the ReActor or CodeFormerCF parameter groups
 
-Open the 'Comfy Workflow' tab and check that the relevant nodes can be added there, if you cannot add the nodes in the ComfyUI workflow then they are not installed correctly and you'll need to follow the installation instructions on their respective pages [(ReActor)](https://github.com/Gourieff/comfyui-reactor-node), [(FaceRestoreCF)](https://github.com/mav-rik/facerestore_cf) or use [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) to install them. Personally I could not get ReActor or FaceRestoreCF to install in the SwarmUI embedded install of ComfyUI due to insightface errors, instead I used a standalone ComfyUI setup and installed the nodes with ComfyUI Manager and then [added it as a backend to SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/blob/master/src/BuiltinExtensions/ComfyUIBackend/README.md#installation-self-start) as `ComfyUI Self-Starting`.
+Open the 'Comfy Workflow' tab and check that the relevant nodes can be added there, if you cannot add the nodes in the ComfyUI workflow then they are not installed correctly and you'll need to ask for help installing them on their respective pages [(ReActor)](https://github.com/Gourieff/comfyui-reactor-node), [(FaceRestoreCF)](https://github.com/mav-rik/facerestore_cf) or try to use [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) to install them.
+
+### I get 'ComfyUI execution error CUDA_PATH is set but CUDA wasnt able to be loaded'
+
+I had this happen even when CUDA_PATH pointed to a valid CUDA toolkit installation, try going to 'System Properties/Environment Variables' and removing `CUDA_PATH` to see if it fixes your problem, this may effect other software finding CUDA.
