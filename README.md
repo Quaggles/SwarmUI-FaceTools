@@ -15,19 +15,13 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 5. Launch SwarmUI as usual, if ReActor or CodeFormerCF nodes are installed you should see parameter groups for them in the generate tab, if not follow the steps below.
 
 ## Installing ReActor and CodeFormerCF Custom Nodes into SwarmUI
-### A. You are using the bundled ComfyUI installed by SwarmUI
 1. Drag any image into the prompt bar, in the parameters section click the "Install IP Adapter" button, this must be done before any other steps, if the button does not appear it's already installed ![image](https://github.com/user-attachments/assets/fcd63537-87e5-4ec1-af04-591b7566e684)
 2. Install [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager) if not already installed by opening a cmd/terminal window in `SwarmUI/dlbackend/comfy/ComfyUI/custom_nodes` and running `git clone https://github.com/ltdrdata/ComfyUI-Manager.git`
 3. Restart SwarmUI
-4. Continue from step 3 in [You are using a standalone ComfyUI install](#b-you-are-using-a-standalone-comfyui-install)
-
-### B. You are using a standalone ComfyUI install
-1. Install [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager) if not already installed by opening a cmd/terminal window in `ComfyUI/custom_nodes` and running `git clone https://github.com/ltdrdata/ComfyUI-Manager.git`
-2. Restart SwarmUI
-3. Open the 'Comfy Workflow' tab and click on the manager button and then 'Custom Nodes Manager': ![image](https://github.com/user-attachments/assets/878878c1-e498-4e3c-922b-72efe382fb12)
-4. In the Custom Nodes Manager find and install 'ReActor Node for ComfyUI' and/or 'Facerestore CF (Code Former)'
-5. Click the red restart button at the bottom of the window then go to your SwarmUI Server/Logs tab and set the view to ComfyUI to view the download/install progress, **this will take a while**
-6. When the logs show that the downloads have finished restart restart SwarmUI and the parameter groups should appear
+4. Open the 'Comfy Workflow' tab and click on the manager button and then 'Custom Nodes Manager': ![image](https://github.com/user-attachments/assets/878878c1-e498-4e3c-922b-72efe382fb12)
+5. In the Custom Nodes Manager find and install 'ReActor Node for ComfyUI' and/or 'Facerestore CF (Code Former)'
+6. Click the red restart button at the bottom of the window then go to your SwarmUI Server/Logs tab and set the view to ComfyUI to view the download/install progress, **this will take a while**
+7. When the logs show that the downloads have finished restart restart SwarmUI and the parameter groups should appear
 
 ## Updating
 1. Shutdown SwarmUI
