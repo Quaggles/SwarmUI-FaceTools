@@ -14,6 +14,23 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 4. Run `SwarmUI\update-windows.bat` to recompile SwarmUI
 5. Launch SwarmUI as usual, if ReActor or CodeFormerCF nodes are installed you should see parameter groups for them in the generate tab
 
+## Installing ReActor and CodeFormerCF Custom Nodes into ComfyUI
+### A. You are using the bundled ComfyUI installed by SwarmUI
+
+1. Drag any image into the prompt bar, in the parameters section click the "Install IP Adapter" button, this must be done before any other steps, if the button does not appear it's already installed ![image](https://github.com/user-attachments/assets/fcd63537-87e5-4ec1-af04-591b7566e684)
+2. Install [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager) by opening a cmd/terminal window in `SwarmUI/dlbackend/comfy/ComfyUI/custom_nodes` and running `git clone https://github.com/ltdrdata/ComfyUI-Manager.git`
+3. Restart SwarmUI
+4. Open the 'Comfy Workflow' tab and click on the manager button and then 'Custom Nodes Manager': ![image](https://github.com/user-attachments/assets/878878c1-e498-4e3c-922b-72efe382fb12)
+5. In the Custom Nodes Manager find and install 'ReActor Node for ComfyUI' and/or 'Facerestore CF (Code Former)'
+6. Click the red restart button at the bottom of the window then go to your SwarmUI Server/Logs tab and set the view to ComfyUI to view the download/install progress, **this will take a while**
+7. When the logs show that the downloads have finished restart SwarmUI and the parameter groups should appear once the backend has loaded
+
+### B. You are using a standalone ComfyUI install
+1. Install [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)
+2. Go to the 'Comfy Workflow' tab, click the 'Manager' button
+3. In the Custom Nodes Manager find and install 'ReActor Node for ComfyUI' and/or 'Facerestore CF (Code Former)', click the red restart button at the bottom of the window
+4. Refresh the SwarmUI window and the parameter groups should appear
+
 ## Updating
 1. Shutdown SwarmUI
 2. Open a cmd/terminal window in `SwarmUI\src\Extensions\SwarmUI-FaceTools`
@@ -49,11 +66,11 @@ Just make sure the parameter group is enabled and that `Face Restore Model` is s
 
 * `Face Restore Model` models must be installed in BOTH:
 
-`"{SwarmUIModelRoot}/facerestore_models"` AND `"ComfyUI/models/facerestore_models"`
+`"{SwarmUIModelRoot}/facerestore_models"` AND `"dlbackend/comfy/ComfyUI/models/facerestore_models"`
 
 * Saved `Face Model` models must be installed in BOTH:
 
-`"{SwarmUIModelRoot}/reactor/faces"` AND `"ComfyUI/models/reactor/faces"`
+`"{SwarmUIModelRoot}/reactor/faces"` AND `"dlbackend/comfy/ComfyUI/models/reactor/faces"`
 
 The ReActor and FaceRestoreCF custom nodes do not follow the 'ComfyUI extra paths' config to allow them to exist only in the SwarmUI ModelRoot folder, this means some models will need to be copied so they exist both in the SwarmUI ModelRoot folder and the ComfyUI model folder. If the model exists only in SwarmUI model folder it will show be visible in the dropdowns but ComfyUI will throw an error when you generate, if they exist only in the ComfyUI model folder they will not show up in the dropdowns in SwarmUI but will be visible on the nodes if you place them in the 'Comfy Workflow' tab.
 
@@ -63,4 +80,6 @@ After installing a model make sure to click the model refresh button in SwarmUI 
 
 ## Troubleshooting
 
-If you can't see the ReActor or CodeFormerCF parameter groups open the 'Comfy Workflow' tab and check that the relevant nodes can be added there, if you cannot add the nodes in the ComfyUI workflow then they are not installed correctly and you'll need to follow the installation instructions on their respective pages [(ReActor)](https://github.com/Gourieff/comfyui-reactor-node), [(FaceRestoreCF)](https://github.com/mav-rik/facerestore_cf) or use [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) to install them. Personally I could not get ReActor or FaceRestoreCF to install in the SwarmUI embedded install of ComfyUI due to insightface errors, instead I used a standalone ComfyUI setup and installed the nodes with ComfyUI Manager and then [added it as a backend to SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/blob/master/src/BuiltinExtensions/ComfyUIBackend/README.md#installation-self-start) as `ComfyUI Self-Starting`.
+### I can't see the ReActor or CodeFormerCF parameter groups
+
+Open the 'Comfy Workflow' tab and check that the relevant nodes can be added there, if you cannot add the nodes in the ComfyUI workflow then they are not installed correctly and you'll need to follow the installation instructions on their respective pages [(ReActor)](https://github.com/Gourieff/comfyui-reactor-node), [(FaceRestoreCF)](https://github.com/mav-rik/facerestore_cf) or use [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) to install them. Personally I could not get ReActor or FaceRestoreCF to install in the SwarmUI embedded install of ComfyUI due to insightface errors, instead I used a standalone ComfyUI setup and installed the nodes with ComfyUI Manager and then [added it as a backend to SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/blob/master/src/BuiltinExtensions/ComfyUIBackend/README.md#installation-self-start) as `ComfyUI Self-Starting`.
