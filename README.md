@@ -73,9 +73,13 @@ After installing a model make sure to click the model refresh button in SwarmUI 
 
 ## Troubleshooting
 
+### An error occurs when clicking 'Generate' when using ReActor
+
+Read through the [ReActor Troubleshooting Guide](https://github.com/Gourieff/comfyui-reactor-node#troubleshooting) and see if any match your error.
+
 ### I can't see the ReActor or CodeFormerCF parameter groups
 
-Open the 'Comfy Workflow' tab and check that the relevant nodes can be added there, if you cannot add the nodes in the ComfyUI workflow then they are not installed correctly and you'll need to ask for help installing them on their respective pages [(ReActor)](https://github.com/Gourieff/comfyui-reactor-node), [(FaceRestoreCF)](https://github.com/mav-rik/facerestore_cf) or try to use [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) to install them.
+Open the 'Comfy Workflow' tab and check that the relevant nodes can be added there, if you cannot add the nodes in the ComfyUI workflow then they are not installed correctly and you'll need to ask for help installing them on their respective pages [ReActor](https://github.com/Gourieff/comfyui-reactor-node), [FaceRestoreCF](https://github.com/mav-rik/facerestore_cf) or try to use [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) to install them.
 
 ### I get 'ComfyUI execution error CUDA_PATH is set but CUDA wasnt able to be loaded'
 
