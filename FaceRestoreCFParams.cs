@@ -11,7 +11,7 @@ public static class FaceRestoreCFParams
 {
     public static float StepInjectPriority = 9;
     private const string Prefix = "[FR] ";
-    private const string FeatureId = "face_restoration";
+    private const string FeatureId = "facerestorecf";
     private const string NodeIdFaceRestore = "FaceRestoreCFWithModel";
     public static readonly List<string> FaceDetectionModels = ["retinaface_resnet50", "retinaface_mobile0.25", "YOLOv5l", "YOLOv5n"];
 
@@ -28,6 +28,9 @@ public static class FaceRestoreCFParams
     {
         // Define required nodes
         ComfyUIBackendExtension.NodeToFeatureMap[NodeIdFaceRestore] = FeatureId;
+        
+        // Add required custom node as installable feature
+        InstallableFeatures.RegisterInstallableFeature(new("FaceRestoreCF", FeatureId, "https://github.com/mav-rik/facerestore_cf", "mav-rik", "This will install the FaceRestoreCF ComfyUI node developed by mav-rik.\nDo you wish to install?"));
 
         // Setup parameters
         T2IParamGroup faceRestorationGroup = new("FaceRestoreCF", Toggles: true, Open: false, IsAdvanced: false, OrderPriority: 9);

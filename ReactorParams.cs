@@ -11,7 +11,7 @@ public static class ReactorParams
 {
     public static float StepInjectPriority = 9.1f;
     private const string Prefix = "[ReActor] ";
-    private const string FeatureId = "ReActor";
+    private const string FeatureId = "reactor";
     private const string NodeIdReactor = "ReActorFaceSwapOpt";
 
     public static readonly List<string> GenderDetect = ["no", "female", "male"];
@@ -66,6 +66,9 @@ public static class ReactorParams
     {
         // Define required nodes
         ComfyUIBackendExtension.NodeToFeatureMap[NodeIdReactor] = FeatureId;
+        
+        // Add required custom node as installable feature
+        InstallableFeatures.RegisterInstallableFeature(new("ReActor", FeatureId, "https://github.com/Gourieff/comfyui-reactor-node", "Gourieff", "This will install the ReActor ComfyUI node developed by Gourieff.\nDo you wish to install?"));
 
         // Setup parameters
         T2IParamGroup reactorGroup = new("ReActor", Toggles: true, Open: false, IsAdvanced: false, OrderPriority: 9);
