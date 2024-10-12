@@ -7,7 +7,7 @@ using SwarmUI.Utils;
 
 namespace Quaggles.Extensions.FaceTools;
 
-public class ReactorExtension : Extension
+public static class ReactorParams
 {
     public static float StepInjectPriority = 9.1f;
     private const string Prefix = "[ReActor] ";
@@ -63,7 +63,7 @@ public class ReactorExtension : Extension
         SearchOption = SearchOption.TopDirectoryOnly, // Node doesn't accept models of this type in subdirectories
     };
 
-    public override void OnInit()
+    public static void Initialise()
     {
         // Define required nodes
         ComfyUIBackendExtension.NodeToFeatureMap[NodeNameReactor] = FeatureReactor;

@@ -7,7 +7,7 @@ using SwarmUI.Utils;
 
 namespace Quaggles.Extensions.FaceTools;
 
-public class FaceRestoreCFExtension : Extension
+public static class FaceRestoreCFParams
 {
     public static float StepInjectPriority = 9;
     private const string Prefix = "[FR] ";
@@ -25,7 +25,7 @@ public class FaceRestoreCFExtension : Extension
         Filter = model => string.Equals(Path.GetExtension(model), ".pth", StringComparison.OrdinalIgnoreCase)
     };
 
-    public override void OnInit()
+    public static void Initialise()
     {
         // Define required nodes
         ComfyUIBackendExtension.NodeToFeatureMap[NodeNameFaceRestore] = FeatureFaceRestore;
