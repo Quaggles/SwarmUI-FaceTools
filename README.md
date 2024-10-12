@@ -2,32 +2,32 @@
 
 A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds parameters for [ReActor](https://github.com/Gourieff/comfyui-reactor-node) and [FaceRestoreCF](https://github.com/mav-rik/facerestore_cf) nodes to the the generate tab.
 
-***If the nodes are not installed in the ComfyUI backend the parameters for that node won't show up in the generate tab.***
-
 ![image](https://github.com/user-attachments/assets/61be3d04-88f2-4f21-b84a-f47435dfefd1)
 
-## Installation
+## Installation (Simple)
+
+1. In SwarmUI go to the Server/Extensions tab
+2. Find FaceTools in the list and click the 'Install' button
+3. Refresh the page and go back to the generate tab, if you see the parameters then the required ComfyUI dependencies are installed you can start using the extension, otherwise continue below.
+4. If dependencies are not installed buttons will be shown in the parameter group to install them. The 'Install IP Adapter' will be shown first if it's not installed, install it and once the backend restarts refresh the page.
+
+![image](https://github.com/user-attachments/assets/fe396a47-6f62-453c-976e-fe99e2d3e15d)
+
+5. If ReActor/CodeFormerCF are not installed a button will be shown, install it and after the backend restarts the parameters should appear and you are good to go.
+
+![image](https://github.com/user-attachments/assets/048df53e-57bf-4758-8f09-ec22b53e1263)
+
+## Installation (Advanced)
 
 1. Shutdown SwarmUI
 2. Open a cmd/terminal window in `SwarmUI\src\Extensions`
 3. Run `git clone https://github.com/Quaggles/SwarmUI-FaceTools.git`
 4. Run `SwarmUI\update-windows.bat` to recompile SwarmUI
-5. Launch SwarmUI as usual, if ReActor or CodeFormerCF nodes are installed you should see parameter groups for them in the generate tab, if not follow the steps below.
-
-## Installing ReActor and CodeFormerCF Custom Nodes into SwarmUI
-1. Drag any image into the prompt bar, in the parameters section click the "Install IP Adapter" button, this must be done before any other steps, if the button does not appear it's already installed ![image](https://github.com/user-attachments/assets/fcd63537-87e5-4ec1-af04-591b7566e684)
-2. Install [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager) if not already installed by opening a cmd/terminal window in `SwarmUI/dlbackend/comfy/ComfyUI/custom_nodes` and running `git clone https://github.com/ltdrdata/ComfyUI-Manager.git`
-3. Restart SwarmUI
-4. Open the 'Comfy Workflow' tab and click on the manager button and then 'Custom Nodes Manager': ![image](https://github.com/user-attachments/assets/878878c1-e498-4e3c-922b-72efe382fb12)
-5. In the Custom Nodes Manager find and install 'ReActor Node for ComfyUI' and/or 'Facerestore CF (Code Former)'
-6. Click the red restart button at the bottom of the window then go to your SwarmUI Server/Logs tab and set the view to ComfyUI to view the download/install progress, **this will take a while**
-7. When the logs show that the downloads have finished restart SwarmUI and the parameter groups should appear
+5. Launch SwarmUI and follow on from [Step 4 of Installation (Simple)](#installation-simple)
 
 ## Updating
-1. Shutdown SwarmUI
-2. Open a cmd/terminal window in `SwarmUI\src\Extensions\SwarmUI-FaceTools`
-3. Run `git pull`
-4. Run `SwarmUI\update-windows.bat` to recompile SwarmUI
+1. In SwarmUI go to the Server/Extensions tab
+2. Click the update button for 'FaceToolsExtension'
 
 ## Usage
 
