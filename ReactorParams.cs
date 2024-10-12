@@ -11,8 +11,8 @@ public static class ReactorParams
 {
     public static float StepInjectPriority = 9.1f;
     private const string Prefix = "[ReActor] ";
-    private const string FeatureReactor = "ReActor";
-    private const string NodeNameReactor = "ReActorFaceSwapOpt";
+    private const string FeatureId = "ReActor";
+    private const string NodeIdReactor = "ReActorFaceSwapOpt";
 
     public static readonly List<string> GenderDetect = ["no", "female", "male"];
     public static readonly List<string> FacesOrder = ["left-right", "right-left", "top-bottom", "bottom-top", "small-large", "large-small"];
@@ -20,8 +20,7 @@ public static class ReactorParams
 
     public static T2IRegisteredParam<Image> FaceImage;
     public static T2IRegisteredParam<double> FaceRestoreVisibility, CodeFormerWeight;
-
-    public static T2IRegisteredParam<string> FaceRestoreModel,
+    public static T2IRegisteredParam<string>FaceRestoreModel,
         SecondFaceRestoreModel,
         FaceSwapModel,
         FaceModel,
@@ -66,7 +65,7 @@ public static class ReactorParams
     public static void Initialise()
     {
         // Define required nodes
-        ComfyUIBackendExtension.NodeToFeatureMap[NodeNameReactor] = FeatureReactor;
+        ComfyUIBackendExtension.NodeToFeatureMap[NodeIdReactor] = FeatureId;
 
         // Setup parameters
         T2IParamGroup reactorGroup = new("ReActor", Toggles: true, Open: false, IsAdvanced: false, OrderPriority: 9);
@@ -78,7 +77,7 @@ public static class ReactorParams
             Toggleable: true,
             Group: reactorGroup,
             ChangeWeight: 2,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             OrderPriority: orderCounter++
         ));
         FaceModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Model",
@@ -88,7 +87,7 @@ public static class ReactorParams
             GetValues: _ => faceModelHelper.GetValues(),
             Group: reactorGroup,
             IgnoreIf: faceModelHelper.NullValue,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             ChangeWeight: 2,
             OrderPriority: orderCounter++
         ));
@@ -98,7 +97,7 @@ public static class ReactorParams
             Min: 0.1, Max: 1, Step: 0.01,
             ViewType: ParamViewType.SLIDER,
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             OrderPriority: orderCounter++
         ));
         FaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Restore Model",
@@ -108,7 +107,7 @@ public static class ReactorParams
             faceRestoreModelHelper.GetDefault(),
             GetValues: _ => faceRestoreModelHelper.GetValues(),
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             OrderPriority: orderCounter++
         ));
         CodeFormerWeight = T2IParamTypes.Register<double>(new($"{Prefix}CodeFormer Weight",
@@ -117,7 +116,7 @@ public static class ReactorParams
             Min: 0, Max: 1, Step: 0.01,
             ViewType: ParamViewType.SLIDER,
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             OrderPriority: orderCounter++
         ));
         SecondFaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Second Face Restore Model",
@@ -126,7 +125,7 @@ public static class ReactorParams
             IgnoreIf: faceRestoreModelHelper.NullValue,
             GetValues: _ => faceRestoreModelHelper.GetValues(),
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             Toggleable: true,
             OrderPriority: orderCounter++
@@ -137,7 +136,7 @@ public static class ReactorParams
             "Download from <a href=\"https://github.com/hben35096/assets/releases/\">https://github.com/hben35096/assets/releases/</a>",
             faceMaskModelHelper.GetDefault(),
             IgnoreIf: faceMaskModelHelper.NullValue, 
-            FeatureFlag: FeatureReactor, 
+            FeatureFlag: FeatureId, 
             Group: reactorGroup, 
             GetValues: _ => faceMaskModelHelper.GetValues(), 
             OrderPriority: orderCounter++
@@ -147,7 +146,7 @@ public static class ReactorParams
             $"see <a href=\"https://github.com/Gourieff/comfyui-reactor-node/pull/321\">https://github.com/Gourieff/comfyui-reactor-node/pull/321</a>.",
             "false",
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             ChangeWeight: 1,
             OrderPriority: orderCounter++
@@ -156,7 +155,7 @@ public static class ReactorParams
             $"Restores the face again after transplanting on the generated image",
             "false",
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
@@ -165,7 +164,7 @@ public static class ReactorParams
             FacesOrder.Last(),
             GetValues: _ => FacesOrder,
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
@@ -174,7 +173,7 @@ public static class ReactorParams
             "0",
             Examples: ["0,1,2", "1,0,2"],
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
@@ -183,7 +182,7 @@ public static class ReactorParams
             GenderDetect.FirstOrDefault(),
             GetValues: _ => GenderDetect,
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
@@ -192,7 +191,7 @@ public static class ReactorParams
             FacesOrder.Last(),
             GetValues: _ => FacesOrder,
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
@@ -201,7 +200,7 @@ public static class ReactorParams
             "0",
             Examples: ["0,1,2", "1,0,2"],
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
@@ -210,7 +209,7 @@ public static class ReactorParams
             GenderDetect.FirstOrDefault(),
             GetValues: _ => GenderDetect,
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
@@ -219,7 +218,7 @@ public static class ReactorParams
             FaceDetectionModels.FirstOrDefault(),
             GetValues: _ => FaceDetectionModels,
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
@@ -230,7 +229,7 @@ public static class ReactorParams
             IgnoreIf: faceSwapModelHelper.NullValue,
             GetValues: _ => faceSwapModelHelper.GetValues(),
             Group: reactorGroup,
-            FeatureFlag: FeatureReactor,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
@@ -238,148 +237,147 @@ public static class ReactorParams
         // Add into workflow
         WorkflowGenerator.AddStep(g =>
         {
-            if (ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureReactor) &&
-                g.UserInput.TryGet(FaceSwapModel, out string faceSwapModel) &&
-                g.UserInput.TryGet(FaceRestoreVisibility, out double faceRestoreVisibility) &&
-                g.UserInput.TryGet(CodeFormerWeight, out double codeFormerWeight) &&
-                g.UserInput.TryGet(FaceDetectionModel, out string faceDetectionModel) &&
-                g.UserInput.TryGet(InputFacesOrder, out string inputFacesOrder) &&
-                g.UserInput.TryGet(InputFacesIndex, out string inputFacesIndex) &&
-                g.UserInput.TryGet(InputGenderDetect, out string inputGenderDetect) &&
-                g.UserInput.TryGet(SourceFacesOrder, out string sourceFacesOrder) &&
-                g.UserInput.TryGet(SourceFacesIndex, out string sourceFacesIndex) &&
-                g.UserInput.TryGet(SourceGenderDetect, out string sourceGenderDetect))
+            // Get these parameters first to determine if we should run
+            bool hasRestoreModel = g.UserInput.TryGet(FaceRestoreModel, out string faceRestoreModel);
+            bool hasImage = g.UserInput.TryGet(FaceImage, out Image inputImage);
+            bool hasModel = g.UserInput.TryGet(FaceModel, out string faceModel);
+            
+            // Only work if either of these are passed
+            if (!hasRestoreModel && !hasImage && !hasModel)
+                return;
+            
+            if (!ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureId))
+                throw new SwarmUserErrorException("ReActor parameters specified, but feature isn't installed");
+            
+            // Get parameters used in multiple branches below
+            double faceRestoreVisibility = g.UserInput.Get(FaceRestoreVisibility);
+            double codeFormerWeight = g.UserInput.Get(CodeFormerWeight);
+            string faceDetectionModel = g.UserInput.Get(FaceDetectionModel);
+            JArray reactorOutput = null;
+            if (hasImage || hasModel) // If user passed in an image/model do face swap
             {
-                JArray reactorOutput = null;
-                // Get name of restore model early as we use it in multiple places
-                bool hasRestoreModel = g.UserInput.TryGet(FaceRestoreModel, out string faceRestoreModel);
-                bool hasImage = g.UserInput.TryGet(FaceImage, out Image inputImage);
-                bool hasModel = g.UserInput.TryGet(FaceModel, out string faceModel);
-                if (hasImage || hasModel) // If user passed in an image/model do face swap
+                string sourceNode = null;
+                if (hasImage)
                 {
-                    string sourceNode = null;
-                    if (hasImage)
-                    {
-                        sourceNode = g.CreateLoadImageNode(inputImage, "image", true);
-                        // Image has priority over model if both provided
-                        hasModel = false;
-                    }
+                    sourceNode = g.CreateLoadImageNode(inputImage, "image", true);
+                    // Image has priority over model if both provided
+                    hasModel = false;
+                }
 
-                    if (hasModel)
+                if (hasModel)
+                {
+                    sourceNode = g.CreateNode("ReActorLoadFaceModel", new JObject
                     {
-                        sourceNode = g.CreateNode("ReActorLoadFaceModel", new JObject
-                        {
-                            ["face_model"] = faceModel
-                        });
-                    }
-
-                    string faceBoostNode = null;
-                    if (g.UserInput.TryGet(FaceBoost, out bool faceBoost) && faceBoost && g.UserInput.TryGet(FaceBoostRestoreAfterMain, out bool faceBoostRestoreAfterMain))
-                    {
-                        faceBoostNode = g.CreateNode("ReActorFaceBoost", new JObject
-                        {
-                            ["enabled"] = true,
-                            ["boost_model"] = faceRestoreModel,
-                            ["interpolation"] = "Bicubic",
-                            ["visibility"] = faceRestoreVisibility,
-                            ["codeformer_weight"] = codeFormerWeight,
-                            ["restore_with_main_after"] = faceBoostRestoreAfterMain,
-                        });
-                    }
-
-                    string optionsNode = g.CreateNode("ReActorOptions", new JObject
-                    {
-                        ["input_faces_order"] = inputFacesOrder,
-                        ["input_faces_index"] = inputFacesIndex,
-                        ["detect_gender_input"] = inputGenderDetect,
-                        ["source_faces_order"] = sourceFacesOrder,
-                        ["source_faces_index"] = sourceFacesIndex,
-                        ["detect_gender_source"] = sourceGenderDetect,
-                        ["console_log_level"] = 1,
+                        ["face_model"] = faceModel
                     });
+                }
 
-                    string reactorNode = g.CreateNode(NodeNameReactor, new JObject
+                string faceBoostNode = null;
+                if (g.UserInput.TryGet(FaceBoost, out bool faceBoost) && faceBoost && g.UserInput.TryGet(FaceBoostRestoreAfterMain, out bool faceBoostRestoreAfterMain))
+                {
+                    faceBoostNode = g.CreateNode("ReActorFaceBoost", new JObject
                     {
-                        ["input_image"] = g.FinalImageOut,
-                        ["options"] = new JArray { optionsNode, 0 },
-                        ["source_image"] = hasImage ? new JArray { sourceNode, 0 } : null,
-                        ["face_model"] = hasModel ? new JArray { sourceNode, 0 } : null,
-                        ["face_boost"] = string.IsNullOrEmpty(faceBoostNode) ? null : new JArray { faceBoostNode, 0 },
                         ["enabled"] = true,
-                        ["swap_model"] = faceSwapModel,
-                        ["facedetection"] = faceDetectionModel,
-                        ["face_restore_model"] = faceRestoreModel,
-                        ["face_restore_visibility"] = faceRestoreVisibility,
+                        ["boost_model"] = faceRestoreModel,
+                        ["interpolation"] = "Bicubic",
+                        ["visibility"] = faceRestoreVisibility,
                         ["codeformer_weight"] = codeFormerWeight,
+                        ["restore_with_main_after"] = faceBoostRestoreAfterMain,
                     });
-                    reactorOutput = [reactorNode, 0];
-                }
-                else if (hasRestoreModel && faceRestoreModel != faceRestoreModelHelper.NullValue) // If a face restore model was provided just do that
-                {
-                    string restoreFace = g.CreateNode("ReActorRestoreFace", new JObject
-                    {
-                        ["image"] = g.FinalImageOut,
-                        ["facedetection"] = faceDetectionModel,
-                        ["model"] = faceRestoreModel,
-                        ["visibility"] = faceRestoreVisibility,
-                        ["codeformer_weight"] = codeFormerWeight
-                    });
-                    reactorOutput = [restoreFace, 0];
-                }
-                else // Nothing valid was provided so stop
-                {
-                    return;
                 }
 
-                // Inserts a second face restore model into the chain
-                if (g.UserInput.TryGet(SecondFaceRestoreModel, out string faceRestoreModelExtra))
+                string optionsNode = g.CreateNode("ReActorOptions", new JObject
                 {
-                    string restoreFace = g.CreateNode("ReActorRestoreFace", new JObject
-                    {
-                        ["image"] = reactorOutput,
-                        ["facedetection"] = faceDetectionModel,
-                        ["model"] = faceRestoreModelExtra,
-                        ["visibility"] = faceRestoreVisibility,
-                        ["codeformer_weight"] = codeFormerWeight
-                    });
-                    reactorOutput = [restoreFace, 0];
-                }
+                    ["input_faces_order"] = g.UserInput.Get(InputFacesOrder),
+                    ["input_faces_index"] = g.UserInput.Get(InputFacesIndex),
+                    ["detect_gender_input"] = g.UserInput.Get(InputGenderDetect),
+                    ["source_faces_order"] = g.UserInput.Get(SourceFacesOrder),
+                    ["source_faces_index"] = g.UserInput.Get(SourceFacesIndex),
+                    ["detect_gender_source"] = g.UserInput.Get(SourceGenderDetect),
+                    ["console_log_level"] = 1,
+                });
 
-                // Masks the restored face result by the generated images face
-                if (g.UserInput.TryGet(FaceMaskModel, out string faceMaskmodel))
+                string reactorNode = g.CreateNode(NodeIdReactor, new JObject
                 {
-                    string swarmYoloMask = g.CreateNode("SwarmYoloDetection", new JObject
-                    {
-                        ["image"] = g.FinalImageOut,
-                        ["model_name"] = faceMaskmodel,
-                        ["index"] = 0,
-                    });
-                    string maskNode = g.CreateNode("ReActorMaskHelper", new JObject
-                    {
-                        ["image"] = g.FinalImageOut,
-                        ["swapped_image"] = reactorOutput,
-                        ["bbox_model_name"] = "",
-                        ["bbox_threshold"] = 0.5,
-                        ["bbox_dilation"] = 10,
-                        ["bbox_crop_factor"] = 3,
-                        ["bbox_drop_size"] = 10,
-                        ["sam_model_name"] = "",
-                        ["sam_dilation"] = 0,
-                        ["sam_threshold"] = 0.93,
-                        ["bbox_expansion"] = 0,
-                        ["mask_hint_threshold"] = 0.7,
-                        ["mask_hint_use_negative"] = "False",
-                        ["morphology_operation"] = "dilate",
-                        ["morphology_distance"] = 0,
-                        ["blur_radius"] = 9,
-                        ["sigma_factor"] = 1,
-                        ["mask_optional"] = new JArray { swarmYoloMask, 0 },
-                    });
-                    reactorOutput = [maskNode, 0];
-                }
-
-                g.FinalImageOut = reactorOutput;
+                    ["input_image"] = g.FinalImageOut,
+                    ["options"] = new JArray { optionsNode, 0 },
+                    ["source_image"] = hasImage ? new JArray { sourceNode, 0 } : null,
+                    ["face_model"] = hasModel ? new JArray { sourceNode, 0 } : null,
+                    ["face_boost"] = string.IsNullOrEmpty(faceBoostNode) ? null : new JArray { faceBoostNode, 0 },
+                    ["enabled"] = true,
+                    ["swap_model"] = g.UserInput.Get(FaceSwapModel),
+                    ["facedetection"] = faceDetectionModel,
+                    ["face_restore_model"] = faceRestoreModel,
+                    ["face_restore_visibility"] = faceRestoreVisibility,
+                    ["codeformer_weight"] = codeFormerWeight,
+                });
+                reactorOutput = [reactorNode, 0];
             }
+            else if (hasRestoreModel && faceRestoreModel != faceRestoreModelHelper.NullValue) // If a face restore model was provided just do that
+            {
+                string restoreFace = g.CreateNode("ReActorRestoreFace", new JObject
+                {
+                    ["image"] = g.FinalImageOut,
+                    ["facedetection"] = faceDetectionModel,
+                    ["model"] = faceRestoreModel,
+                    ["visibility"] = faceRestoreVisibility,
+                    ["codeformer_weight"] = codeFormerWeight
+                });
+                reactorOutput = [restoreFace, 0];
+            }
+            else // Nothing valid was provided so stop
+            {
+                return;
+            }
+
+            // Inserts a second face restore model into the chain
+            if (g.UserInput.TryGet(SecondFaceRestoreModel, out string faceRestoreModelExtra))
+            {
+                string restoreFace = g.CreateNode("ReActorRestoreFace", new JObject
+                {
+                    ["image"] = reactorOutput,
+                    ["facedetection"] = faceDetectionModel,
+                    ["model"] = faceRestoreModelExtra,
+                    ["visibility"] = faceRestoreVisibility,
+                    ["codeformer_weight"] = codeFormerWeight
+                });
+                reactorOutput = [restoreFace, 0];
+            }
+
+            // Masks the restored face result by the generated images face
+            if (g.UserInput.TryGet(FaceMaskModel, out string faceMaskModel))
+            {
+                string swarmYoloMask = g.CreateNode("SwarmYoloDetection", new JObject
+                {
+                    ["image"] = g.FinalImageOut,
+                    ["model_name"] = faceMaskModel,
+                    ["index"] = 0,
+                });
+                string maskNode = g.CreateNode("ReActorMaskHelper", new JObject
+                {
+                    ["image"] = g.FinalImageOut,
+                    ["swapped_image"] = reactorOutput,
+                    ["bbox_model_name"] = "",
+                    ["bbox_threshold"] = 0.5,
+                    ["bbox_dilation"] = 10,
+                    ["bbox_crop_factor"] = 3,
+                    ["bbox_drop_size"] = 10,
+                    ["sam_model_name"] = "",
+                    ["sam_dilation"] = 0,
+                    ["sam_threshold"] = 0.93,
+                    ["bbox_expansion"] = 0,
+                    ["mask_hint_threshold"] = 0.7,
+                    ["mask_hint_use_negative"] = "False",
+                    ["morphology_operation"] = "dilate",
+                    ["morphology_distance"] = 0,
+                    ["blur_radius"] = 9,
+                    ["sigma_factor"] = 1,
+                    ["mask_optional"] = new JArray { swarmYoloMask, 0 },
+                });
+                reactorOutput = [maskNode, 0];
+            }
+
+            g.FinalImageOut = reactorOutput;
         }, StepInjectPriority);
     }
 }

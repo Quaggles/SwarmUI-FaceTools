@@ -11,9 +11,8 @@ public static class FaceRestoreCFParams
 {
     public static float StepInjectPriority = 9;
     private const string Prefix = "[FR] ";
-    private const string FeatureFaceRestore = "face_restoration";
-    private const string NodeNameFaceRestore = "FaceRestoreCFWithModel";
-    private const string NodeNameFaceRestoreLoader = "FaceRestoreModelLoader";
+    private const string FeatureId = "face_restoration";
+    private const string NodeIdFaceRestore = "FaceRestoreCFWithModel";
     public static readonly List<string> FaceDetectionModels = ["retinaface_resnet50", "retinaface_mobile0.25", "YOLOv5l", "YOLOv5n"];
 
     public static T2IRegisteredParam<double> Fidelity;
@@ -28,7 +27,7 @@ public static class FaceRestoreCFParams
     public static void Initialise()
     {
         // Define required nodes
-        ComfyUIBackendExtension.NodeToFeatureMap[NodeNameFaceRestore] = FeatureFaceRestore;
+        ComfyUIBackendExtension.NodeToFeatureMap[NodeIdFaceRestore] = FeatureId;
 
         // Setup parameters
         T2IParamGroup faceRestorationGroup = new("FaceRestoreCF", Toggles: true, Open: false, IsAdvanced: false, OrderPriority: 9);
@@ -40,7 +39,7 @@ public static class FaceRestoreCFParams
             Min: 0, Max: 1, Step: 0.01,
             ViewType: ParamViewType.SLIDER,
             Group: faceRestorationGroup,
-            FeatureFlag: FeatureFaceRestore,
+            FeatureFlag: FeatureId,
             OrderPriority: orderCounter++
         ));
         FaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Restore Model",
@@ -50,7 +49,7 @@ public static class FaceRestoreCFParams
             IgnoreIf: "None",
             GetValues: _ => faceRestoreModelHelper.GetValues(),
             Group: faceRestorationGroup,
-            FeatureFlag: FeatureFaceRestore,
+            FeatureFlag: FeatureId,
             ChangeWeight: 2,
             OrderPriority: orderCounter++
         ));
@@ -59,7 +58,7 @@ public static class FaceRestoreCFParams
             FaceDetectionModels.FirstOrDefault(),
             GetValues: _ => FaceDetectionModels,
             Group: faceRestorationGroup,
-            FeatureFlag: FeatureFaceRestore,
+            FeatureFlag: FeatureId,
             IsAdvanced: true,
             ChangeWeight: 1,
             OrderPriority: orderCounter++
@@ -68,24 +67,22 @@ public static class FaceRestoreCFParams
         // Add into workflow
         WorkflowGenerator.AddStep(g =>
         {
-            if (ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureFaceRestore) &&
-                g.UserInput.TryGet(Fidelity, out double fidelity) &&
-                g.UserInput.TryGet(FaceRestoreModel, out string faceRestoreModel) &&
-                g.UserInput.TryGet(FaceDetectionModel, out string faceDetectionModel))
+            // Require at least FaceRestoreModel param
+            if (!g.UserInput.TryGet(FaceRestoreModel, out string faceRestoreModel)) return;
+            if (!ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureId))
+                throw new SwarmUserErrorException("FaceRestoreCF parameters specified, but feature isn't installed");
+            string loaderNode = g.CreateNode("FaceRestoreModelLoader", new JObject
             {
-                string loaderNode = g.CreateNode(NodeNameFaceRestoreLoader, new JObject
-                {
-                    ["model_name"] = faceRestoreModel,
-                });
-                string restoreNode = g.CreateNode(NodeNameFaceRestore, new JObject
-                {
-                    ["facerestore_model"] = new JArray { loaderNode, 0 },
-                    ["image"] = g.FinalImageOut,
-                    ["facedetection"] = faceDetectionModel,
-                    ["codeformer_fidelity"] = fidelity,
-                });
-                g.FinalImageOut = [restoreNode, 0];
-            }
+                ["model_name"] = faceRestoreModel,
+            });
+            string restoreNode = g.CreateNode(NodeIdFaceRestore, new JObject
+            {
+                ["facerestore_model"] = new JArray { loaderNode, 0 },
+                ["image"] = g.FinalImageOut,
+                ["facedetection"] = g.UserInput.Get(FaceDetectionModel),
+                ["codeformer_fidelity"] = g.UserInput.Get(Fidelity),
+            });
+            g.FinalImageOut = [restoreNode, 0];
         }, StepInjectPriority);
     }
 }
