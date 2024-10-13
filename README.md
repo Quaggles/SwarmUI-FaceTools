@@ -4,6 +4,15 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 ![image](https://github.com/user-attachments/assets/61be3d04-88f2-4f21-b84a-f47435dfefd1)
 
+## Changelog
+<details>
+  <summary>13 October 2024</summary>
+  
+* Much better install process for dependencies with no need to use ComfyUI Manager, if dependencies aren't installed a button to install them will appear in the parameter group, see the new [Installation steps](https://github.com/Quaggles/SwarmUI-FaceTools/?tab=readme-ov-file#installation-simple) for details
+* Previously ReActor and FaceRestoreCF were 2 extension classes, they've been merged so it's simpler to manage in the extension tab
+* Model dropdowns now read from ComfyUI model folder, no need to install models into both the SwarmUI model folder and the ComfyUI model folder anymore. ***Warning:*** Deleted models do not get removed from the list when refreshing, you'll need to restart SwarmUI for them to disappear
+</details>
+
 ## Installation (Simple)
 
 1. In SwarmUI go to the Server/Extensions tab
@@ -16,6 +25,8 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 5. If ReActor/CodeFormerCF are not installed a button will be shown, install it and after the backend restarts the parameters should appear and you are good to go.
 
 ![image](https://github.com/user-attachments/assets/048df53e-57bf-4758-8f09-ec22b53e1263)
+
+Unfortunately FaceRestoreCF cannot be installed this way yet as it is awaiting a pull request to fix it. You can do basic face restoration with ReActor in the meantime, check the usage section below. If you really want FaceRestoreCF you can install it with ComfyUI manager manually.
 
 ## Installation (Advanced)
 
@@ -54,6 +65,8 @@ Many more parameters are available if you enable 'Advanced Options' at the botto
 FaceRestoreCF does not automatically download the model, if the dropdown is empty you will need to download it manually [from here](https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth) rename it to `codeformer-v0.1.0.pth` and place it in `"SwarmUI/dlbackend/comfy/ComfyUI/models/facerestore_models"`
 
 Just make sure the parameter group is enabled and that `Face Restore Model` is set and it should work, you can also use 'Comfy Workflow/Import From Generate Tab' feature to see what the parameters are doing in the workflow.
+
+ReActor can do all the face restoration actions that FaceRestoreCF can but FaceRestoreCF caches the face restore model and runs much faster (And doesn't automatically download 2gb of models) so I've left support in for those who prefer it.
 
 ## Model Paths for Face Restore and Fask Models
 
