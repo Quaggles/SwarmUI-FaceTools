@@ -67,6 +67,9 @@ public static class ReactorParams
                 T2IParamTypes.ConcatDropdownValsClean(ref YoloModels, nodeYoloDetection["input"]?["required"]?["model_name"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
             }
         });
+        
+        // We can find yolo models before backends load since they are in modelroot
+        T2IParamTypes.ConcatDropdownValsClean(ref YoloModels, ComfyUIBackendExtension.InternalListModelsFor("yolov8", false));
 
         // Setup parameters
         T2IParamGroup reactorGroup = new("ReActor", Toggles: true, Open: false, IsAdvanced: false, OrderPriority: 9);
