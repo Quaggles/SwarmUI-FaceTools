@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using SwarmUI.Builtin_ComfyUIBackend;
 using SwarmUI.Core;
 using SwarmUI.Text2Image;
@@ -12,30 +11,36 @@ public static class FaceRestoreCFParams
     public static float StepInjectPriority = 9;
     private const string Prefix = "[FR] ";
     private const string FeatureId = "facerestorecf";
-    private const string NodeIdFaceRestore = "FaceRestoreCFWithModel";
-    public static readonly List<string> FaceDetectionModels = ["retinaface_resnet50", "retinaface_mobile0.25", "YOLOv5l", "YOLOv5n"];
 
     public static T2IRegisteredParam<double> Fidelity;
     public static T2IRegisteredParam<string> FaceRestoreModel, FaceDetectionModel;
-
-    private static ModelHelper faceRestoreModelHelper = new("facerestore_models")
-    {
-        Default = "codeformer-v0.1.0.pth",
-        Filter = model => string.Equals(Path.GetExtension(model), ".pth", StringComparison.OrdinalIgnoreCase)
-    };
+    
+    public static List<string> FaceRestoreModels = [];
+    public static List<string> FaceDetectionModels = [];
 
     public static void Initialise()
     {
         // Define required nodes
-        ComfyUIBackendExtension.NodeToFeatureMap[NodeIdFaceRestore] = FeatureId;
+        ComfyUIBackendExtension.NodeToFeatureMap["FaceRestoreCFWithModel"] = FeatureId;
         
         // Add required custom node as installable feature
         InstallableFeatures.RegisterInstallableFeature(new("FaceRestoreCF", FeatureId, "https://github.com/mav-rik/facerestore_cf", "mav-rik", "This will install the FaceRestoreCF ComfyUI node developed by mav-rik.\nDo you wish to install?"));
+        
+        ComfyUIBackendExtension.RawObjectInfoParsers.Add(rawObjectInfo =>
+        {
+            if (rawObjectInfo.TryGetValue("FaceRestoreModelLoader", out JToken nodeLoader))
+            {
+                T2IParamTypes.ConcatDropdownValsClean(ref FaceRestoreModels, nodeLoader["input"]?["required"]?["model_name"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
+            }
+            if (rawObjectInfo.TryGetValue("FaceRestoreCFWithModel", out JToken nodeRestore))
+            {
+                T2IParamTypes.ConcatDropdownValsClean(ref FaceDetectionModels, nodeRestore["input"]?["required"]?["facedetection"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
+            }
+        });
 
         // Setup parameters
         T2IParamGroup faceRestorationGroup = new("FaceRestoreCF", Toggles: true, Open: false, IsAdvanced: false, OrderPriority: 9);
         int orderCounter = 0;
-        var modelRoot = Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, Program.ServerSettings.Paths.ModelRoot);
         Fidelity = T2IParamTypes.Register<double>(new($"{Prefix}Fidelity",
             $"Face restoration strength (Lower is stronger).",
             "0.5",
@@ -47,10 +52,9 @@ public static class FaceRestoreCFParams
         ));
         FaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Restore Model",
             $"Model to use for face restoration.\n" +
-            $"To add new models put them in both <i><b>'{modelRoot}/{faceRestoreModelHelper.Subfolder}'</b></i> AND <i><b>'ComfyUI/models/{faceRestoreModelHelper.Subfolder}'</b></i>",
-            faceRestoreModelHelper.GetDefault(),
-            IgnoreIf: "None",
-            GetValues: _ => faceRestoreModelHelper.GetValues(),
+            $"To add new models put them in <i><b>'ComfyUI/models/facerestore_models'</b></i>",
+            "codeformer-v0.1.0.pth",
+            GetValues: _ => FaceRestoreModels,
             Group: faceRestorationGroup,
             FeatureFlag: FeatureId,
             ChangeWeight: 2,
@@ -58,7 +62,7 @@ public static class FaceRestoreCFParams
         ));
         FaceDetectionModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Detection Model",
             $"Model to use for face detection.",
-            FaceDetectionModels.FirstOrDefault(),
+            "retinaface_resnet50",
             GetValues: _ => FaceDetectionModels,
             Group: faceRestorationGroup,
             FeatureFlag: FeatureId,
@@ -72,13 +76,13 @@ public static class FaceRestoreCFParams
         {
             // Require at least FaceRestoreModel param
             if (!g.UserInput.TryGet(FaceRestoreModel, out string faceRestoreModel)) return;
-            if (!ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureId))
+            if (!g.Features.Contains(FeatureId))
                 throw new SwarmUserErrorException("FaceRestoreCF parameters specified, but feature isn't installed");
             string loaderNode = g.CreateNode("FaceRestoreModelLoader", new JObject
             {
                 ["model_name"] = faceRestoreModel,
             });
-            string restoreNode = g.CreateNode(NodeIdFaceRestore, new JObject
+            string restoreNode = g.CreateNode("FaceRestoreCFWithModel", new JObject
             {
                 ["facerestore_model"] = new JArray { loaderNode, 0 },
                 ["image"] = g.FinalImageOut,

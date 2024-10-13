@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using SwarmUI.Builtin_ComfyUIBackend;
 using SwarmUI.Core;
 using SwarmUI.Text2Image;
@@ -12,11 +11,6 @@ public static class ReactorParams
     public static float StepInjectPriority = 9.1f;
     private const string Prefix = "[ReActor] ";
     private const string FeatureId = "reactor";
-    private const string NodeIdReactor = "ReActorFaceSwapOpt";
-
-    public static readonly List<string> GenderDetect = ["no", "female", "male"];
-    public static readonly List<string> FacesOrder = ["left-right", "right-left", "top-bottom", "bottom-top", "small-large", "large-small"];
-    public static readonly List<string> FaceDetectionModels = ["retinaface_resnet50", "retinaface_mobile0.25", "YOLOv5l", "YOLOv5n"];
 
     public static T2IRegisteredParam<Image> FaceImage;
     public static T2IRegisteredParam<double> FaceRestoreVisibility, CodeFormerWeight;
@@ -34,41 +28,45 @@ public static class ReactorParams
         SourceFacesOrder;
 
     public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain;
-
-    private static ModelHelper faceRestoreModelHelper = new("facerestore_models")
-    {
-        // These get automatically downloaded by the ReActor installer so assume they exist in the ComfyUI model folder without requiring them in ModelRoot
-        AlwaysInclude = { "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx", "GPEN-BFR-1024.onnx", "GPEN-BFR-2048.onnx" },
-        Default = "codeformer-v0.1.0.pth",
-        SearchOption = SearchOption.TopDirectoryOnly, // Node doesn't accept models of this type in subdirectories
-        NullValue = "none",
-    };
-
-    private static ModelHelper faceSwapModelHelper = new("insightface")
-    {
-        // This gets automatically downloaded by the ReActor installer so assume it exists in the ComfyUI model folder without requiring them in ModelRoot
-        AlwaysInclude = { "inswapper_128.onnx" },
-        Default = "inswapper_128.onnx",
-        SearchOption = SearchOption.TopDirectoryOnly, // Node doesn't accept models of this type in subdirectories
-    };
-
-    private static ModelHelper faceMaskModelHelper = new("yolov8")
-    {
-        Default = "face_yolov8m-seg_60.pt", // Pick this if it exists
-    };
-
-    private static ModelHelper faceModelHelper = new("reactor/faces")
-    {
-        SearchOption = SearchOption.TopDirectoryOnly, // Node doesn't accept models of this type in subdirectories
-    };
+    
+    public static List<string> FaceRestoreModels = [];
+    public static List<string> FaceSwapModels = [];
+    public static List<string> FaceModels = [];
+    public static List<string> FaceDetectionModels = [];
+    public static List<string> YoloModels = [];
+    public static List<string> GenderDetectOptions = [];
+    public static List<string> FacesOrderOptions = [];
 
     public static void Initialise()
     {
         // Define required nodes
-        ComfyUIBackendExtension.NodeToFeatureMap[NodeIdReactor] = FeatureId;
+        ComfyUIBackendExtension.NodeToFeatureMap["ReActorFaceSwapOpt"] = FeatureId;
         
         // Add required custom node as installable feature
         InstallableFeatures.RegisterInstallableFeature(new("ReActor", FeatureId, "https://github.com/Gourieff/comfyui-reactor-node", "Gourieff", "This will install the ReActor ComfyUI node developed by Gourieff.\nDo you wish to install?"));
+        
+        ComfyUIBackendExtension.RawObjectInfoParsers.Add(rawObjectInfo =>
+        {
+            if (rawObjectInfo.TryGetValue("ReActorFaceSwapOpt", out JToken nodeReActor))
+            {
+                T2IParamTypes.ConcatDropdownValsClean(ref FaceRestoreModels, nodeReActor["input"]?["required"]?["face_restore_model"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
+                T2IParamTypes.ConcatDropdownValsClean(ref FaceSwapModels, nodeReActor["input"]?["required"]?["swap_model"]?.FirstOrDefault()?.Select(m => $"{m}"));
+                T2IParamTypes.ConcatDropdownValsClean(ref FaceDetectionModels, nodeReActor["input"]?["required"]?["facedetection"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
+            }
+            if (rawObjectInfo.TryGetValue("ReActorOptions", out JToken nodeReActorOptions))
+            {
+                T2IParamTypes.ConcatDropdownValsClean(ref GenderDetectOptions, nodeReActorOptions["input"]?["required"]?["detect_gender_input"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
+                T2IParamTypes.ConcatDropdownValsClean(ref FacesOrderOptions, nodeReActorOptions["input"]?["required"]?["input_faces_order"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
+            }
+            if (rawObjectInfo.TryGetValue("ReActorLoadFaceModel", out JToken nodeReActorLoadFaceModel))
+            {
+                T2IParamTypes.ConcatDropdownValsClean(ref FaceModels, nodeReActorLoadFaceModel["input"]?["required"]?["face_model"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
+            }
+            if (rawObjectInfo.TryGetValue("SwarmYoloDetection", out JToken nodeYoloDetection))
+            {
+                T2IParamTypes.ConcatDropdownValsClean(ref YoloModels, nodeYoloDetection["input"]?["required"]?["model_name"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
+            }
+        });
 
         // Setup parameters
         T2IParamGroup reactorGroup = new("ReActor", Toggles: true, Open: false, IsAdvanced: false, OrderPriority: 9);
@@ -85,11 +83,11 @@ public static class ReactorParams
         ));
         FaceModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Model",
             $"The model containing a face you want to swap, this is skipped if a 'Face Image' is provided and enabled.\n" +
-            $"To add new models put them in both <i><b>'{modelRoot}/{faceModelHelper.Subfolder}'</b></i> AND <i><b>'ComfyUI/models/{faceModelHelper.Subfolder}'</b></i>",
-            faceModelHelper.GetDefault(),
-            GetValues: _ => faceModelHelper.GetValues(),
+            $"To add new models put them in <i><b>'ComfyUI/models/reactor/faces'</b></i>",
+            "none",
+            GetValues: _ => FaceModels,
             Group: reactorGroup,
-            IgnoreIf: faceModelHelper.NullValue,
+            IgnoreIf: "none",
             FeatureFlag: FeatureId,
             ChangeWeight: 2,
             OrderPriority: orderCounter++
@@ -105,10 +103,10 @@ public static class ReactorParams
         ));
         FaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Restore Model",
             $"Model to use for face restoration.\n" +
-            $"To add new models put them in both <i><b>'{modelRoot}/{faceRestoreModelHelper.Subfolder}'</b></i> AND <i><b>'ComfyUI/models/{faceRestoreModelHelper.Subfolder}'</b></i>.\n" +
+            $"To add new models put them in <i><b>'ComfyUI/models/facerestore_model'</b></i>.\n" +
             "Download from <a href=\"https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models/facerestore_models\">https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models/facerestore_models</a>",
-            faceRestoreModelHelper.GetDefault(),
-            GetValues: _ => faceRestoreModelHelper.GetValues(),
+            "codeformer-v0.1.0.pth",
+            GetValues: _ => FaceRestoreModels,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
             OrderPriority: orderCounter++
@@ -124,9 +122,9 @@ public static class ReactorParams
         ));
         SecondFaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Second Face Restore Model",
             $"Runs a second face restoration model after the main swap/restoration.",
-            faceRestoreModelHelper.GetDefault("GPEN-BFR-1024.onnx"),
-            IgnoreIf: faceRestoreModelHelper.NullValue,
-            GetValues: _ => faceRestoreModelHelper.GetValues(),
+            "GPEN-BFR-1024.onnx",
+            IgnoreIf: "none",
+            GetValues: _ => FaceRestoreModels,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
             IsAdvanced: true,
@@ -137,11 +135,10 @@ public static class ReactorParams
             "Masks out the area around faces to avoid the swap/restoration affecting other nearby elements like hair.\n" +
             $"To add new models put them in <i><b>'{modelRoot}/yolov8'</b></i>.\n" +
             "Download from <a href=\"https://github.com/hben35096/assets/releases/\">https://github.com/hben35096/assets/releases/</a>",
-            faceMaskModelHelper.GetDefault(),
-            IgnoreIf: faceMaskModelHelper.NullValue, 
+            "face_yolov8m-seg_60.pt",
             FeatureFlag: FeatureId, 
             Group: reactorGroup, 
-            GetValues: _ => faceMaskModelHelper.GetValues(), 
+            GetValues: _ => YoloModels, 
             OrderPriority: orderCounter++
         ));
         FaceBoost = T2IParamTypes.Register<bool>(new($"{Prefix}Face Boost",
@@ -164,8 +161,8 @@ public static class ReactorParams
         ));
         InputFacesOrder = T2IParamTypes.Register<string>(new($"{Prefix}Input Faces Order",
             $"Sorting order for faces in the generated image.",
-            FacesOrder.Last(),
-            GetValues: _ => FacesOrder,
+            "large-small",
+            GetValues: _ => FacesOrderOptions,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
             IsAdvanced: true,
@@ -182,8 +179,8 @@ public static class ReactorParams
         ));
         InputGenderDetect = T2IParamTypes.Register<string>(new($"{Prefix}Input Gender Detect",
             $"Only swap faces in the generated image that match this gender.",
-            GenderDetect.FirstOrDefault(),
-            GetValues: _ => GenderDetect,
+            "no",
+            GetValues: _ => GenderDetectOptions,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
             IsAdvanced: true,
@@ -191,8 +188,8 @@ public static class ReactorParams
         ));
         SourceFacesOrder = T2IParamTypes.Register<string>(new($"{Prefix}Source Faces Order",
             $"Sorting order for faces in the source face image.",
-            FacesOrder.Last(),
-            GetValues: _ => FacesOrder,
+            "large-small",
+            GetValues: _ => FacesOrderOptions,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
             IsAdvanced: true,
@@ -209,8 +206,8 @@ public static class ReactorParams
         ));
         SourceGenderDetect = T2IParamTypes.Register<string>(new($"{Prefix}Source Gender Detect",
             $"Only swap faces in the source face image that match this gender.",
-            GenderDetect.FirstOrDefault(),
-            GetValues: _ => GenderDetect,
+            "no",
+            GetValues: _ => GenderDetectOptions,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
             IsAdvanced: true,
@@ -218,7 +215,7 @@ public static class ReactorParams
         ));
         FaceDetectionModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Detection Model",
             $"Model to use for face detection.",
-            FaceDetectionModels.FirstOrDefault(),
+            "retinaface_resnet50",
             GetValues: _ => FaceDetectionModels,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
@@ -227,10 +224,9 @@ public static class ReactorParams
         ));
         FaceSwapModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Swap Model",
             $"Model to use for face swap.\n" +
-            $"To add new models put them in both <i><b>'{modelRoot}/{faceSwapModelHelper.Subfolder}'</b></i> AND <i><b>'ComfyUI/models/{faceSwapModelHelper.Subfolder}'</b></i>.",
-            faceSwapModelHelper.GetDefault(),
-            IgnoreIf: faceSwapModelHelper.NullValue,
-            GetValues: _ => faceSwapModelHelper.GetValues(),
+            $"To add new models put them in <i><b>'ComfyUI/models/insightface'</b></i>.",
+            "inswapper_128.onnx",
+            GetValues: _ => FaceSwapModels,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
             IsAdvanced: true,
@@ -249,7 +245,7 @@ public static class ReactorParams
             if (!hasRestoreModel && !hasImage && !hasModel)
                 return;
             
-            if (!ComfyUIBackendExtension.FeaturesSupported.Contains(FeatureId))
+            if (!g.Features.Contains(FeatureId))
                 throw new SwarmUserErrorException("ReActor parameters specified, but feature isn't installed");
             
             // Get parameters used in multiple branches below
@@ -300,7 +296,7 @@ public static class ReactorParams
                     ["console_log_level"] = 1,
                 });
 
-                string reactorNode = g.CreateNode(NodeIdReactor, new JObject
+                string reactorNode = g.CreateNode("ReActorFaceSwapOpt", new JObject
                 {
                     ["input_image"] = g.FinalImageOut,
                     ["options"] = new JArray { optionsNode, 0 },
@@ -316,7 +312,7 @@ public static class ReactorParams
                 });
                 reactorOutput = [reactorNode, 0];
             }
-            else if (hasRestoreModel && faceRestoreModel != faceRestoreModelHelper.NullValue) // If a face restore model was provided just do that
+            else if (hasRestoreModel && faceRestoreModel != "none") // If a face restore model was provided just do that
             {
                 string restoreFace = g.CreateNode("ReActorRestoreFace", new JObject
                 {
