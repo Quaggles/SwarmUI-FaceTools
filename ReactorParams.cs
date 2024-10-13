@@ -139,6 +139,7 @@ public static class ReactorParams
             FeatureFlag: FeatureId, 
             Group: reactorGroup, 
             GetValues: _ => YoloModels, 
+            Toggleable: true,
             OrderPriority: orderCounter++
         ));
         FaceBoost = T2IParamTypes.Register<bool>(new($"{Prefix}Face Boost",
