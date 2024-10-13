@@ -37,8 +37,9 @@ Unfortunately FaceRestoreCF cannot be installed this way yet as it is awaiting a
 5. Launch SwarmUI and follow on from [Step 4 of Installation (Simple)](#installation-simple)
 
 ## Updating
-1. In SwarmUI go to the Server/Extensions tab
-2. Click the update button for 'FaceToolsExtension'
+1. Update SwarmUI first, updates to this extension might require the latest version of SwarmUI to function
+2. In SwarmUI go to the Server/Extensions tab
+3. Click the update button for 'FaceToolsExtension'
 
 ## Usage
 
