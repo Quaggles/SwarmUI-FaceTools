@@ -8,8 +8,8 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 1. In SwarmUI go to the Server/Extensions tab
 2. Find FaceTools in the list and click the 'Install' button
-3. Refresh the page and go back to the generate tab, if you see the parameters then the required ComfyUI dependencies are installed you can start using the extension, otherwise continue below.
-4. If dependencies are not installed buttons will be shown in the parameter group to install them. The 'Install IP Adapter' will be shown first if it's not installed, install it and once the backend restarts refresh the page.
+3. Refresh the page and go back to the generate tab, if you see the parameters then the required ComfyUI dependencies are installed and you can start using the extension, otherwise continue below.
+4. If dependencies are not installed buttons will be shown in the parameter group to install them. The 'Install IP Adapter' button will be shown first if it's not installed, install it and once the backend restarts refresh the page.
 
 ![image](https://github.com/user-attachments/assets/fe396a47-6f62-453c-976e-fe99e2d3e15d)
 
