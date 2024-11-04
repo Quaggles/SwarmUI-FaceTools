@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.IO;
+using Newtonsoft.Json.Linq;
 using SwarmUI.Builtin_ComfyUIBackend;
 using SwarmUI.Core;
 using SwarmUI.Text2Image;
@@ -45,6 +46,15 @@ public static class ReactorParams
         // Add required custom node as installable feature
         InstallableFeatures.RegisterInstallableFeature(new("ReActor", FeatureId, "https://github.com/Gourieff/comfyui-reactor-node", "Gourieff", "This will install the ReActor ComfyUI node developed by Gourieff.\nDo you wish to install?"));
         
+        // Prevents install button from being shown during backend load if it looks like it was installed
+        // it will appear if the backend loads and the backend reports it's not installed
+        if (Directory.Exists(Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, $"{ComfyUIBackendExtension.Folder}/DLNodes/comfyui-reactor-node")))
+        {
+            ComfyUIBackendExtension.FeaturesSupported.UnionWith([FeatureId]);
+            ComfyUIBackendExtension.FeaturesDiscardIfNotFound.UnionWith([FeatureId]);
+        }
+        
+        // Callbacks when ComfyUI is ready to get node and model information
         ComfyUIBackendExtension.RawObjectInfoParsers.Add(rawObjectInfo =>
         {
             if (rawObjectInfo.TryGetValue("ReActorFaceSwapOpt", out JToken nodeReActor))
