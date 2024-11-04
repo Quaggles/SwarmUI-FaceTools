@@ -30,13 +30,14 @@ public static class ReactorParams
 
     public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain;
     
-    public static List<string> FaceRestoreModels = [];
-    public static List<string> FaceSwapModels = [];
-    public static List<string> FaceModels = [];
-    public static List<string> FaceDetectionModels = [];
-    public static List<string> YoloModels = [];
-    public static List<string> GenderDetectOptions = [];
-    public static List<string> FacesOrderOptions = [];
+    // Prepopulated with options that should always exist
+    public static List<string> FaceRestoreModels = ["none", "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx", "GPEN-BFR-1024.onnx", "GPEN-BFR-2048.onnx"]; // Should have been autodownloaded by node on ComfyUI start
+    public static List<string> FaceSwapModels = ["inswapper_128.onnx"]; // By providing this the node should autodownload it if not already available
+    public static List<string> FaceModels = ["none"];
+    public static List<string> FaceDetectionModels = ["retinaface_resnet50", "retinaface_mobile0.25", "YOLOv5l", "YOLOv5n"];
+    public static List<string> GenderDetectOptions = ["no", "female", "male"];
+    public static List<string> FacesOrderOptions = ["left-right", "right-left", "top-bottom", "bottom-top", "small-large", "large-small"];
+    public static List<string> YoloModels = ["none"];
 
     public static void Initialise()
     {
@@ -61,12 +62,6 @@ public static class ReactorParams
             {
                 T2IParamTypes.ConcatDropdownValsClean(ref FaceRestoreModels, nodeReActor["input"]?["required"]?["face_restore_model"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
                 T2IParamTypes.ConcatDropdownValsClean(ref FaceSwapModels, nodeReActor["input"]?["required"]?["swap_model"]?.FirstOrDefault()?.Select(m => $"{m}"));
-                T2IParamTypes.ConcatDropdownValsClean(ref FaceDetectionModels, nodeReActor["input"]?["required"]?["facedetection"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
-            }
-            if (rawObjectInfo.TryGetValue("ReActorOptions", out JToken nodeReActorOptions))
-            {
-                T2IParamTypes.ConcatDropdownValsClean(ref GenderDetectOptions, nodeReActorOptions["input"]?["required"]?["detect_gender_input"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
-                T2IParamTypes.ConcatDropdownValsClean(ref FacesOrderOptions, nodeReActorOptions["input"]?["required"]?["input_faces_order"]?.FirstOrDefault()?.Select(m => $"{m}") ?? []);
             }
             if (rawObjectInfo.TryGetValue("ReActorLoadFaceModel", out JToken nodeReActorLoadFaceModel))
             {
@@ -149,6 +144,7 @@ public static class ReactorParams
             $"To add new models put them in <i><b>'{modelRoot}/yolov8'</b></i>.\n" +
             "Download from <a href=\"https://github.com/hben35096/assets/releases/\">https://github.com/hben35096/assets/releases/</a>",
             "face_yolov8m-seg_60.pt",
+            IgnoreIf: "none",
             FeatureFlag: FeatureId, 
             Group: reactorGroup, 
             GetValues: _ => YoloModels, 
