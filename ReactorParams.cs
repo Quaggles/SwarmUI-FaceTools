@@ -28,17 +28,45 @@ public static class ReactorParams
         InputFacesOrder,
         SourceFacesOrder;
 
-    public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain;
+    public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain, RemoveParamsIfDefault;
     
     // Prepopulated with options that should always exist
     public static List<string> FaceRestoreModels = ["none", "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx", "GPEN-BFR-1024.onnx", "GPEN-BFR-2048.onnx"]; // Should have been autodownloaded by node on ComfyUI start
-    public static List<string> FaceSwapModels = ["inswapper_128.onnx"]; // By providing this the node should autodownload it if not already available
+    public static List<string> FaceSwapModels = ["inswapper_128.onnx"];
     public static List<string> FaceModels = ["none"];
     public static List<string> FaceDetectionModels = ["retinaface_resnet50", "retinaface_mobile0.25", "YOLOv5l", "YOLOv5n"];
     public static List<string> GenderDetectOptions = ["no", "female", "male"];
+    public const string GenderDetectOptionsDefault = "no";
     public static List<string> FacesOrderOptions = ["left-right", "right-left", "top-bottom", "bottom-top", "small-large", "large-small"];
+    public const string FacesOrderOptionsDefault = "large-small";
     public static List<string> YoloModels = ["none"];
+    
+    // A list of swap parameters that should be removed if swapping is not used
+    private static HashSet<T2IParamType> faceSwapParams = [];
 
+    // Cleans up parameters that are left as default
+    static string GetAndRemoveIfDefault(this T2IParamInput input, T2IRegisteredParam<string> param)
+    {
+        if (input.TryGet(RemoveParamsIfDefault, out var removeParams) && !removeParams) return input.Get(param);
+        if (!input.TryGet(param, out var value)) return param.Type.Default;
+        if (value == param.Type.Default)
+            if (input.ValuesInput.Remove(param.Type.ID))
+                Logs.Verbose($"{Prefix}Removed redundant param '{param.Type.ID}' as it was set to the default");
+        return value;
+    }
+    
+    // Cleans up parameters that are left as default
+    static double GetAndRemoveIfDefault(this T2IParamInput input, T2IRegisteredParam<double> param)
+    {
+        if (input.TryGet(RemoveParamsIfDefault, out var removeParams) && !removeParams) return input.Get(param);
+        var defaultVal = double.Parse(param.Type.Default);
+        if (!input.TryGet(param, out var value)) return defaultVal;
+        if (Math.Abs(value - defaultVal) < param.Type.Step)
+            if (input.ValuesInput.Remove(param.Type.ID))
+                Logs.Verbose($"{Prefix}Removed redundant param '{param.Type.ID}' as it was set to the default");
+        return value;
+    }
+    
     public static void Initialise()
     {
         // Define required nodes
@@ -81,7 +109,7 @@ public static class ReactorParams
         int orderCounter = 0;
         var modelRoot = Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, Program.ServerSettings.Paths.ModelRoot);
         FaceImage = T2IParamTypes.Register<Image>(new($"{Prefix}Face Image",
-            "The source image containing a face you want to swap, leave empty/turn off to only run face restore.",
+            "[Optional] The source image containing a face you want to swap, leave empty/turn off to only run face restore.",
             null,
             Toggleable: true,
             Group: reactorGroup,
@@ -90,7 +118,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         FaceModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Model",
-            "The model containing a face you want to swap, this is skipped if a 'Face Image' is provided and enabled.\n" +
+            "[Optional] The model containing a face you want to swap, this is skipped if a 'Face Image' is provided and enabled.\n" +
             "Face Models can be created in the Comfy Workflow tab using the 'Save Face Model' node.\n" +
             "To add new models put them in <i><b>'SwarmUI/dlbackend/comfy/ComfyUI/models/reactor/faces'</b></i>",
             "none",
@@ -111,7 +139,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         FaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Restore Model",
-            "Model to use for face restoration.\n" +
+            "[Optional] Model to use for face restoration.\n" +
             "To add new models put them in <i><b>'SwarmUI/dlbackend/comfy/ComfyUI/models/facerestore_models'</b></i>.\n" +
             "Download from <a href=\"https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models/facerestore_models\">https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models/facerestore_models</a>",
             "codeformer-v0.1.0.pth",
@@ -156,6 +184,7 @@ public static class ReactorParams
             "Restores the face after inswapper face swap but before transplanting on the generated image\n" +
             "see <a href=\"https://github.com/Gourieff/comfyui-reactor-node/pull/321\">https://github.com/Gourieff/comfyui-reactor-node/pull/321</a>.",
             "false",
+            IgnoreIf: "false",
             Group: reactorGroup,
             FeatureFlag: FeatureId,
             IsAdvanced: true,
@@ -165,6 +194,7 @@ public static class ReactorParams
         FaceBoostRestoreAfterMain = T2IParamTypes.Register<bool>(new($"{Prefix}Face Boost Restore After Main",
             "Restores the face again after transplanting on the generated image",
             "false",
+            IgnoreIf: "false",
             Group: reactorGroup,
             FeatureFlag: FeatureId,
             IsAdvanced: true,
@@ -172,7 +202,7 @@ public static class ReactorParams
         ));
         InputFacesOrder = T2IParamTypes.Register<string>(new($"{Prefix}Input Faces Order",
             "Sorting order for faces in the generated image.",
-            "large-small",
+            FacesOrderOptionsDefault,
             GetValues: _ => FacesOrderOptions,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
@@ -190,7 +220,7 @@ public static class ReactorParams
         ));
         InputGenderDetect = T2IParamTypes.Register<string>(new($"{Prefix}Input Gender Detect",
             "Only swap faces in the generated image that match this gender.",
-            "no",
+            GenderDetectOptionsDefault,
             GetValues: _ => GenderDetectOptions,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
@@ -199,7 +229,7 @@ public static class ReactorParams
         ));
         SourceFacesOrder = T2IParamTypes.Register<string>(new($"{Prefix}Source Faces Order",
             "Sorting order for faces in the source face image.",
-            "large-small",
+            FacesOrderOptionsDefault,
             GetValues: _ => FacesOrderOptions,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
@@ -217,7 +247,7 @@ public static class ReactorParams
         ));
         SourceGenderDetect = T2IParamTypes.Register<string>(new($"{Prefix}Source Gender Detect",
             "Only swap faces in the source face image that match this gender.",
-            "no",
+            GenderDetectOptionsDefault,
             GetValues: _ => GenderDetectOptions,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
@@ -226,7 +256,7 @@ public static class ReactorParams
         ));
         FaceDetectionModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Detection Model",
             "Model to use for face detection.",
-            "retinaface_resnet50",
+            FaceDetectionModels.First(),
             GetValues: _ => FaceDetectionModels,
             Group: reactorGroup,
             FeatureFlag: FeatureId,
@@ -244,26 +274,52 @@ public static class ReactorParams
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
+        RemoveParamsIfDefault = T2IParamTypes.Register<bool>(new($"{Prefix}Remove Params If Default",
+            "Removes certain parameters if they use the default value for a cleaner parameter list in the UI",
+            "true",
+            IgnoreIf: "true",
+            DoNotSave: true,
+            DoNotPreview: true,
+            Group: reactorGroup,
+            FeatureFlag: FeatureId,
+            IsAdvanced: true,
+            OrderPriority: orderCounter++
+        ));
+
+        // List of parameters that are only used if face swapping
+        faceSwapParams =
+        [
+            FaceBoost.Type,
+            FaceBoostRestoreAfterMain.Type,
+            FaceSwapModel.Type,
+            InputFacesIndex.Type,
+            SourceFacesIndex.Type,
+            InputGenderDetect.Type,
+            SourceGenderDetect.Type,
+            InputFacesOrder.Type,
+            SourceFacesOrder.Type,
+        ];
 
         // Add into workflow
         WorkflowGenerator.AddStep(g =>
         {
             // Get these parameters first to determine if we should run
-            bool hasRestoreModel = g.UserInput.TryGet(FaceRestoreModel, out string faceRestoreModel);
+            bool hasFaceRestoreModel = g.UserInput.TryGet(FaceRestoreModel, out string faceRestoreModel) && faceRestoreModel != "none";
             bool hasImage = g.UserInput.TryGet(FaceImage, out Image inputImage);
             bool hasModel = g.UserInput.TryGet(FaceModel, out string faceModel);
+            var faceSwapModel = g.UserInput.GetAndRemoveIfDefault(FaceSwapModel);
             
             // Only work if either of these are passed
-            if (!hasRestoreModel && !hasImage && !hasModel)
+            if (!hasFaceRestoreModel && !hasImage && !hasModel)
                 return;
             
             if (!g.Features.Contains(FeatureId))
                 throw new SwarmUserErrorException("ReActor parameters specified, but feature isn't installed");
             
             // Get parameters used in multiple branches below
-            double faceRestoreVisibility = g.UserInput.Get(FaceRestoreVisibility);
-            double codeFormerWeight = g.UserInput.Get(CodeFormerWeight);
-            string faceDetectionModel = g.UserInput.Get(FaceDetectionModel);
+            double faceRestoreVisibility = g.UserInput.GetAndRemoveIfDefault(FaceRestoreVisibility);
+            double codeFormerWeight = g.UserInput.GetAndRemoveIfDefault(CodeFormerWeight);
+            string faceDetectionModel = g.UserInput.GetAndRemoveIfDefault(FaceDetectionModel);
             JArray reactorOutput = null;
             if (hasImage || hasModel) // If user passed in an image/model do face swap
             {
@@ -273,6 +329,8 @@ public static class ReactorParams
                     sourceNode = g.CreateLoadImageNode(inputImage, "image", true);
                     // Image has priority over model if both provided
                     hasModel = false;
+                    if (g.UserInput.ValuesInput.Remove(FaceModel.Type.ID))
+                        Logs.Verbose($"{Prefix}Removed redundant param '{FaceModel.Type.ID}' as it was skipped due to {FaceImage.Type.ID} being provided");
                 }
 
                 if (hasModel)
@@ -284,7 +342,7 @@ public static class ReactorParams
                 }
 
                 string faceBoostNode = null;
-                if (g.UserInput.TryGet(FaceBoost, out bool faceBoost) && faceBoost && g.UserInput.TryGet(FaceBoostRestoreAfterMain, out bool faceBoostRestoreAfterMain))
+                if (hasFaceRestoreModel && g.UserInput.TryGet(FaceBoost, out bool faceBoost) && faceBoost)
                 {
                     faceBoostNode = g.CreateNode("ReActorFaceBoost", new JObject
                     {
@@ -293,18 +351,23 @@ public static class ReactorParams
                         ["interpolation"] = "Bicubic",
                         ["visibility"] = faceRestoreVisibility,
                         ["codeformer_weight"] = codeFormerWeight,
-                        ["restore_with_main_after"] = faceBoostRestoreAfterMain,
+                        ["restore_with_main_after"] = g.UserInput.Get(FaceBoostRestoreAfterMain)
                     });
+                }
+                else
+                {
+                    if (g.UserInput.ValuesInput.Remove(FaceBoostRestoreAfterMain.Type.ID)) 
+                        Logs.Verbose($"{Prefix}Removed redundant param '{FaceBoostRestoreAfterMain.Type.ID}' as it wasn't used");
                 }
 
                 string optionsNode = g.CreateNode("ReActorOptions", new JObject
                 {
-                    ["input_faces_order"] = g.UserInput.Get(InputFacesOrder),
-                    ["input_faces_index"] = g.UserInput.Get(InputFacesIndex),
-                    ["detect_gender_input"] = g.UserInput.Get(InputGenderDetect),
-                    ["source_faces_order"] = g.UserInput.Get(SourceFacesOrder),
-                    ["source_faces_index"] = g.UserInput.Get(SourceFacesIndex),
-                    ["detect_gender_source"] = g.UserInput.Get(SourceGenderDetect),
+                    ["input_faces_order"] = g.UserInput.GetAndRemoveIfDefault(InputFacesOrder),
+                    ["input_faces_index"] = g.UserInput.GetAndRemoveIfDefault(InputFacesIndex),
+                    ["detect_gender_input"] = g.UserInput.GetAndRemoveIfDefault(InputGenderDetect),
+                    ["source_faces_order"] = g.UserInput.GetAndRemoveIfDefault(SourceFacesOrder),
+                    ["source_faces_index"] = g.UserInput.GetAndRemoveIfDefault(SourceFacesIndex),
+                    ["detect_gender_source"] = g.UserInput.GetAndRemoveIfDefault(SourceGenderDetect),
                     ["console_log_level"] = 1,
                 });
 
@@ -316,7 +379,7 @@ public static class ReactorParams
                     ["face_model"] = hasModel ? new JArray { sourceNode, 0 } : null,
                     ["face_boost"] = string.IsNullOrEmpty(faceBoostNode) ? null : new JArray { faceBoostNode, 0 },
                     ["enabled"] = true,
-                    ["swap_model"] = g.UserInput.Get(FaceSwapModel),
+                    ["swap_model"] = faceSwapModel,
                     ["facedetection"] = faceDetectionModel,
                     ["face_restore_model"] = faceRestoreModel,
                     ["face_restore_visibility"] = faceRestoreVisibility,
@@ -324,7 +387,7 @@ public static class ReactorParams
                 });
                 reactorOutput = [reactorNode, 0];
             }
-            else if (hasRestoreModel && faceRestoreModel != "none") // If a face restore model was provided just do that
+            else // If a face restore model was provided just do that
             {
                 string restoreFace = g.CreateNode("ReActorRestoreFace", new JObject
                 {
@@ -335,10 +398,11 @@ public static class ReactorParams
                     ["codeformer_weight"] = codeFormerWeight
                 });
                 reactorOutput = [restoreFace, 0];
-            }
-            else // Nothing valid was provided so stop
-            {
-                return;
+                
+                // Remove parameters from the user input that were not utilised to keep things clean
+                foreach (var param in faceSwapParams)
+                    if (g.UserInput.ValuesInput.Remove(param.ID))
+                        Logs.Verbose($"{Prefix}Removed redundant param '{param.ID}' as face swap was not used");
             }
 
             // Inserts a second face restore model into the chain
