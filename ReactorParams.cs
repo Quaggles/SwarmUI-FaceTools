@@ -81,7 +81,7 @@ public static class ReactorParams
         int orderCounter = 0;
         var modelRoot = Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, Program.ServerSettings.Paths.ModelRoot);
         FaceImage = T2IParamTypes.Register<Image>(new($"{Prefix}Face Image",
-            $"The source image containing a face you want to swap, leave empty/turn off to only run face restore.",
+            "The source image containing a face you want to swap, leave empty/turn off to only run face restore.",
             null,
             Toggleable: true,
             Group: reactorGroup,
@@ -90,8 +90,9 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         FaceModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Model",
-            $"The model containing a face you want to swap, this is skipped if a 'Face Image' is provided and enabled.\n" +
-            $"To add new models put them in <i><b>'ComfyUI/models/reactor/faces'</b></i>",
+            "The model containing a face you want to swap, this is skipped if a 'Face Image' is provided and enabled.\n" +
+            "Face Models can be created in the Comfy Workflow tab using the 'Save Face Model' node.\n" +
+            "To add new models put them in <i><b>'SwarmUI/dlbackend/comfy/ComfyUI/models/reactor/faces'</b></i>",
             "none",
             GetValues: _ => FaceModels,
             Group: reactorGroup,
@@ -101,7 +102,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         FaceRestoreVisibility = T2IParamTypes.Register<double>(new($"{Prefix}Face Restore Visibility",
-            $"How visible the face restore is against the original image (Higher is stronger).",
+            "How visible the face restore is against the original image (Higher is stronger).",
             "1",
             Min: 0.1, Max: 1, Step: 0.01,
             ViewType: ParamViewType.SLIDER,
@@ -110,8 +111,8 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         FaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Restore Model",
-            $"Model to use for face restoration.\n" +
-            $"To add new models put them in <i><b>'ComfyUI/models/facerestore_model'</b></i>.\n" +
+            "Model to use for face restoration.\n" +
+            "To add new models put them in <i><b>'SwarmUI/dlbackend/comfy/ComfyUI/models/facerestore_models'</b></i>.\n" +
             "Download from <a href=\"https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models/facerestore_models\">https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models/facerestore_models</a>",
             "codeformer-v0.1.0.pth",
             GetValues: _ => FaceRestoreModels,
@@ -120,7 +121,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         CodeFormerWeight = T2IParamTypes.Register<double>(new($"{Prefix}CodeFormer Weight",
-            $"Face restoration weight with CodeFormer model (Lower is stronger).",
+            "Face restoration weight with CodeFormer model (Lower is stronger).",
             "0.5",
             Min: 0, Max: 1, Step: 0.01,
             ViewType: ParamViewType.SLIDER,
@@ -129,7 +130,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         SecondFaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Second Face Restore Model",
-            $"Runs a second face restoration model after the main swap/restoration.",
+            "Runs a second face restoration model after the main swap/restoration.",
             "GPEN-BFR-1024.onnx",
             IgnoreIf: "none",
             GetValues: _ => FaceRestoreModels,
@@ -152,8 +153,8 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         FaceBoost = T2IParamTypes.Register<bool>(new($"{Prefix}Face Boost",
-            $"Restores the face after insightface but before transplanting on the generated image\n" +
-            $"see <a href=\"https://github.com/Gourieff/comfyui-reactor-node/pull/321\">https://github.com/Gourieff/comfyui-reactor-node/pull/321</a>.",
+            "Restores the face after inswapper face swap but before transplanting on the generated image\n" +
+            "see <a href=\"https://github.com/Gourieff/comfyui-reactor-node/pull/321\">https://github.com/Gourieff/comfyui-reactor-node/pull/321</a>.",
             "false",
             Group: reactorGroup,
             FeatureFlag: FeatureId,
@@ -162,7 +163,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         FaceBoostRestoreAfterMain = T2IParamTypes.Register<bool>(new($"{Prefix}Face Boost Restore After Main",
-            $"Restores the face again after transplanting on the generated image",
+            "Restores the face again after transplanting on the generated image",
             "false",
             Group: reactorGroup,
             FeatureFlag: FeatureId,
@@ -170,7 +171,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         InputFacesOrder = T2IParamTypes.Register<string>(new($"{Prefix}Input Faces Order",
-            $"Sorting order for faces in the generated image.",
+            "Sorting order for faces in the generated image.",
             "large-small",
             GetValues: _ => FacesOrderOptions,
             Group: reactorGroup,
@@ -179,7 +180,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         InputFacesIndex = T2IParamTypes.Register<string>(new($"{Prefix}Input Faces Index",
-            $"Changes the indexes of faces on the generated image for swapping.",
+            "Changes the indexes of faces on the generated image for swapping.",
             "0",
             Examples: ["0,1,2", "1,0,2"],
             Group: reactorGroup,
@@ -188,7 +189,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         InputGenderDetect = T2IParamTypes.Register<string>(new($"{Prefix}Input Gender Detect",
-            $"Only swap faces in the generated image that match this gender.",
+            "Only swap faces in the generated image that match this gender.",
             "no",
             GetValues: _ => GenderDetectOptions,
             Group: reactorGroup,
@@ -197,7 +198,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         SourceFacesOrder = T2IParamTypes.Register<string>(new($"{Prefix}Source Faces Order",
-            $"Sorting order for faces in the source face image.",
+            "Sorting order for faces in the source face image.",
             "large-small",
             GetValues: _ => FacesOrderOptions,
             Group: reactorGroup,
@@ -206,7 +207,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         SourceFacesIndex = T2IParamTypes.Register<string>(new($"{Prefix}Source Faces Index",
-            $"Changes the indexes of faces on the source face image for swapping.",
+            "Changes the indexes of faces on the source face image for swapping.",
             "0",
             Examples: ["0,1,2", "1,0,2"],
             Group: reactorGroup,
@@ -215,7 +216,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         SourceGenderDetect = T2IParamTypes.Register<string>(new($"{Prefix}Source Gender Detect",
-            $"Only swap faces in the source face image that match this gender.",
+            "Only swap faces in the source face image that match this gender.",
             "no",
             GetValues: _ => GenderDetectOptions,
             Group: reactorGroup,
@@ -224,7 +225,7 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         FaceDetectionModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Detection Model",
-            $"Model to use for face detection.",
+            "Model to use for face detection.",
             "retinaface_resnet50",
             GetValues: _ => FaceDetectionModels,
             Group: reactorGroup,
@@ -233,8 +234,9 @@ public static class ReactorParams
             OrderPriority: orderCounter++
         ));
         FaceSwapModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Swap Model",
-            $"Model to use for face swap.\n" +
-            $"To add new models put them in <i><b>'ComfyUI/models/insightface'</b></i>.",
+            "Model to use for face swap.\n" +
+            "To add new models put them in <i><b>'SwarmUI/dlbackend/comfy/ComfyUI/models/insightface'</b></i>.\n" +
+            "Download from <a href=\"https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models\">https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models</a>",
             "inswapper_128.onnx",
             GetValues: _ => FaceSwapModels,
             Group: reactorGroup,
