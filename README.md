@@ -9,7 +9,7 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
   <summary>4 November 2024</summary>
 
 * ReActor install button will now not show up if you load the page before the backend has loaded
-* Dropdown parameters are not prepopulated so they now show up if you load the page before the backend has loaded
+* Dropdown parameters are now prepopulated where possible so they will show up if you load the page before the backend has loaded
 * Expanded the readme to give some possible solutions to common issues people have been running into and flesh out some things
 * Parameters that are not relevant to the current ReActor workflow are now automatically removed from the image parameter list to keep the UI cleaner, for example you won't see parameters like 'Input Faces Order' filling up the list unless you changed it from the default, see the comparison below, to disable this behaviour you can disable the 'Remove Params If Default' param
 
