@@ -34,7 +34,7 @@ public static class ReactorParams
     public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain, RemoveParamsIfDefault;
     
     // Prepopulated with options that should always exist
-    public static List<string> FaceRestoreModels = ["none", "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx", "GPEN-BFR-1024.onnx", "GPEN-BFR-2048.onnx"]; // Should have been autodownloaded by node on ComfyUI start
+    public static List<string> FaceRestoreModels = ["none", "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx"]; // Should have been autodownloaded by node on ComfyUI start
     public static List<string> FaceSwapModels = ["inswapper_128.onnx"];
     public static List<string> FaceModels = ["none"];
     public static List<string> FaceDetectionModels = ["retinaface_resnet50", "retinaface_mobile0.25", "YOLOv5l", "YOLOv5n"];
@@ -200,7 +200,7 @@ public static class ReactorParams
         ));
         SecondFaceRestoreModel = T2IParamTypes.Register<string>(new($"{Prefix}Second Face Restore Model",
             "Runs a second face restoration model after the main swap/restoration.",
-            "GPEN-BFR-1024.onnx",
+            "GPEN-BFR-512.onnx",
             IgnoreIf: "none",
             GetValues: _ => FaceRestoreModels,
             Group: reactorGroup,
