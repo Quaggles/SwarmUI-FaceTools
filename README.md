@@ -1,10 +1,18 @@
 # SwarmUI-FaceTools
 
-A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds parameters for [ReActor](https://github.com/Gourieff/comfyui-reactor-node) and [FaceRestoreCF](https://github.com/mav-rik/facerestore_cf) nodes to the the generate tab.
+A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds parameters for the [ReActor (with unsafe content filter)](https://github.com/Gourieff/ComfyUI-ReActor) node to the generate tab.
 
-![image](https://github.com/user-attachments/assets/61be3d04-88f2-4f21-b84a-f47435dfefd1)
+![image](https://github.com/user-attachments/assets/60c38f11-2b61-4841-8705-3709efb884e8)
 
 ## Changelog
+<details>
+  <summary>24 January 2025</summary>
+
+* **[Notice]** The old ReActor repository (https://github.com/Gourieff/comfyui-reactor-node) was removed from GitHub, an updated version with a filter for unsafe content that is compliant with [GitHub rules](https://docs.github.com/en/site-policy/acceptable-use-policies/github-misinformation-and-disinformation#synthetic--manipulated-media-tools) has been made: https://github.com/Gourieff/ComfyUI-ReActor. If you have the old node installed (You installed prior to 17-01-2024) you will see the following message on SwarmUI startup as it removes the old node so you can install the new one:
+
+`[Init] [FaceTools] Moving deprecated ReActor repository to recycle bin 'SwarmUI/src/BuiltinExtensions/ComfyUIBackend/DLNodes/comfyui-reactor-node', click the 'Install ReActor' button in the parameter list to install its replacement`
+* Removed [FaceRestoreCF](https://github.com/mav-rik/facerestore_cf) support as it is no longer being maintained and ReActor can do face restoration with more options and models supported
+</details>
 <details>
   <summary>4 November 2024</summary>
 
@@ -37,7 +45,7 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 ![image](https://github.com/user-attachments/assets/048df53e-57bf-4758-8f09-ec22b53e1263)
 
-6. Check that `SwarmUI/dlbackend/comfy/ComfyUI/models/insightface/inswapper_128.onnx` exists and if it doesn't download it from https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models and put it there
+6. Download `inswapper_128.onnx` from https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models and put it here: `SwarmUI/dlbackend/comfy/ComfyUI/models/insightface/inswapper_128.onnx`
 
 7. If you run into issues check the [Troubleshooting section](#troubleshooting)
 
@@ -56,42 +64,31 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 ## Usage
 
-### ReActor
-
 These parameters inject different nodes to the workflow based on the options selected.
 
 If `Face Image` is provided then face swap will be performed after image generation using the face/s in this image.
 
 If `Face Model` is set a saved Face Model is used to perform the face swap. Face Models can be created in the Comfy Workflow tab using the 'Save Face Model' node. `Face Image` takes priority over `Face Model` if both are set.
 
-If `Face Restore Model` is set then face restoration will be run after the face swap, if `Face Image` or `Face Model` were not provided it runs directly on the generated image similar to FaceRestoreCF. If this option is 'None' then face restoration is skipped.
+If `Face Restore Model` is set then face restoration will be run after the face swap, if `Face Image` or `Face Model` were not provided it runs directly on the generated image. If this option is 'None' then face restoration is skipped.
 
 If `Second Face Restore Model` (Advanced option) is set then a second face restore model will be run after the first. I found good results with codeformer-v0.1.0 first to fix distortions then GPEN-BFR-1024 as the second model to sharpen the result.
 
 If `Face Mask Model` is set the face swap and face restore will be masked so it doesn't effect overlapping features like hair. If the dropdown is empty download models from here: [YOLOv8 Segmentation models](https://github.com/hben35096/assets/releases/) and put them in `{SwarmUIModelRoot}/yolov8`
 
-`Face Boost` is described [here](https://github.com/Gourieff/comfyui-reactor-node?tab=readme-ov-file#051-alpha1)
+If `Face Boost` is set itr estores the face after the face swap but before transplanting on the generated image, can increase quality but results may vary. A side effect of enabling this with <b>Restore After Main</b> disabled with is that only one face in the image will be restored or swapped
 
-Many more parameters are available if you enable 'Advanced Options' at the bottom of the panel. All parameters have tooltips or read through the [ReActor readme](https://github.com/Gourieff/comfyui-reactor-node) for more info, you can also use 'Comfy Workflow/Import From Generate Tab' feature to see what the parameters are doing in the ComfyUI workflow.
-
-### FaceRestoreCF
-Unfortunately FaceRestoreCF cannot be installed with the 1 click button yet as it is awaiting a pull request to fix it. You can do basic face restoration with ReActor in the meantime, check the usage section above. If you really want FaceRestoreCF you can install it with ComfyUI manager manually.
-
-FaceRestoreCF does not automatically download the model, if the dropdown is empty you will need to download it manually [from here](https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth) rename it to `codeformer-v0.1.0.pth` and place it in `"SwarmUI/dlbackend/comfy/ComfyUI/models/facerestore_models"`
-
-Just make sure the parameter group is enabled and that `Face Restore Model` is set and it should work, you can also use 'Comfy Workflow/Import From Generate Tab' feature to see what the parameters are doing in the workflow.
-
-ReActor can do all the face restoration actions that FaceRestoreCF can but FaceRestoreCF caches the face restore model and runs much faster (And doesn't automatically download 2gb of models) so I've left support in for those who prefer it.
+Many more parameters are available if you enable 'Advanced Options' at the bottom of the panel. All parameters have tooltips or read through the [ReActor readme](https://github.com/Gourieff/ComfyUI-ReActor) for more info, you can also use 'Comfy Workflow/Import From Generate Tab' feature to see what the parameters are doing in the ComfyUI workflow.
 
 ## Model Paths for Face Restore and Fask Models
 
-The ReActor and FaceRestoreCF custom nodes do not follow the 'ComfyUI extra paths' config to allow them to exist in the SwarmUI ModelRoot folder.
+The ReActor custom nodes do not follow the 'ComfyUI extra paths' config to allow them to exist in the SwarmUI ModelRoot folder.
 
-* `Face Swap` models must be installed in:
+* `Face Swap` models can be downloaded from [here](https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models) and must be installed in:
 
 `"SwarmUI/dlbackend/comfy/ComfyUI/models/insightface"`
 
-* `Face Restore Model` models must be installed in:
+* `Face Restore Model` models can be downloaded from [here](https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models/facerestore_models) and must be installed in:
 
 `"SwarmUI/dlbackend/comfy/ComfyUI/models/facerestore_models"`
 
@@ -103,17 +100,15 @@ After installing a model make sure to click the model refresh button in SwarmUI 
 
 ## Troubleshooting
 
+SwarmUI will update ReActor automatically if you have AutoUpdate enabled for the ComfyUI backend. If you need to update the node manually or do manual troubleshooting steps it can be found in this folder `SwarmUI\src\BuiltinExtensions\ComfyUIBackend\DLNodes\ComfyUI-ReActor`.
+
+### I see a black image result from the face swap
+
+This is not a bug, ReActor returns a black image when the NSFW detector detects unsafe content in the source image to comply with [GitHub rules](https://docs.github.com/en/site-policy/acceptable-use-policies/github-misinformation-and-disinformation#synthetic--manipulated-media-tools).
+
 ### ModuleNotFoundError: No module named 'insightface'
 
-If you installed SwarmUI fresh after October 22nd it's likely you have ComfyUI v0.2.4 or greater which might require some extra steps to get working
-
-1. Ensure SwarmUI is shutdown
-2. Start a terminal/cmd in `SwarmUI/dlbackend/comfy/python_embeded`
-3. Run the command `python.exe -m pip install numpy==1.26.4`, if using Powershell you might need to prepend commands with `./` to ensure it doesn't find your global python install on PATH
-4. Then run the command `python.exe -m pip install https://github.com/Gourieff/Assets/raw/main/Insightface/insightface-0.7.3-cp312-cp312-win_amd64.whl`
-5. Launch SwarmUI and hopefully the error is gone, for more information about this issue [read here](https://github.com/Gourieff/comfyui-reactor-node/issues/471)
-
-If that still doesn't solve the issue you can try:
+SwarmUI should install a precompiled insightface wheel when you click the 'Install IP Adapter' button but if that didn't work you can compile it manually with the following steps:
 
 1. Install Visual Studio 2022 Community version OR only VS C++ Build Tools and select "Desktop Development with C++" under "Workloads -> Desktop & Mobile"
 2. Find the python version of your ComfyUI backend by looking at the file properties of `SwarmUI\dlbackend\comfy\python_embeded\python.exe`, for this example I have Python 3.12.7
@@ -128,15 +123,15 @@ Try going to the folder in the error message and deleting the `inswapper_128.onn
 
 ### An error occurs when clicking 'Generate' when using ReActor
 
-Read through the [ReActor Troubleshooting Guide](https://github.com/Gourieff/comfyui-reactor-node#troubleshooting) and see if any match your error.
+Read through the [ReActor Troubleshooting Guide](https://github.com/Gourieff/ComfyUI-ReActor#troubleshooting) and see if any match your error.
 
 ### I get 'ComfyUI execution error CUDA_PATH is set but CUDA wasn't able to be loaded'
 
 I had this happen even when CUDA_PATH pointed to a valid CUDA toolkit installation, try going to 'System Properties/Environment Variables' and removing `CUDA_PATH` to see if it fixes your problem, this may effect other software finding CUDA.
 
-### I can't see the ReActor or CodeFormerCF parameter groups
+### I can't see the ReActor parameter groups
 
-Open the 'Comfy Workflow' tab and check that the relevant nodes can be added there, if you cannot add the nodes in the ComfyUI workflow then they are not installed correctly and you might need to ask for help installing them on their respective pages [ReActor](https://github.com/Gourieff/comfyui-reactor-node), [FaceRestoreCF](https://github.com/mav-rik/facerestore_cf) or the [SwarmUI discord](https://discord.gg/swarmui-1243166023859961988).
+Open the 'Comfy Workflow' tab and check that the relevant nodes can be added there, if you cannot add the nodes in the ComfyUI workflow then they are not installed correctly and you might need look through the [ReActor Github](https://github.com/Gourieff/ComfyUI-ReActor) or the [SwarmUI Discord](https://discord.gg/swarmui-1243166023859961988).
 
 ### If all else fails
 Ask for help on the [SwarmUI discord](https://discord.gg/swarmui-1243166023859961988)
