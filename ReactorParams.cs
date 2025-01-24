@@ -1,15 +1,18 @@
 ﻿using System.IO;
+using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json.Linq;
 using SwarmUI.Builtin_ComfyUIBackend;
 using SwarmUI.Core;
 using SwarmUI.Text2Image;
 using SwarmUI.Utils;
+using SearchOption = System.IO.SearchOption;
 
 namespace Quaggles.Extensions.FaceTools;
 
 public static class ReactorParams
 {
     public static float StepInjectPriority = 9.1f;
+    private const string ExtensionPrefix = "[FaceTools] ";
     private const string Prefix = "[ReActor] ";
     private const string FeatureId = "reactor";
 
@@ -51,7 +54,7 @@ public static class ReactorParams
         if (!input.TryGet(param, out var value)) return param.Type.Default;
         if (value == param.Type.Default)
             if (input.ValuesInput.Remove(param.Type.ID))
-                Logs.Verbose($"{Prefix}Removed redundant param '{param.Type.ID}' as it was set to the default");
+                Logs.Verbose($"{ExtensionPrefix}Removed redundant param '{param.Type.ID}' as it was set to the default");
         return value;
     }
     
@@ -63,7 +66,7 @@ public static class ReactorParams
         if (!input.TryGet(param, out var value)) return defaultVal;
         if (Math.Abs(value - defaultVal) < param.Type.Step)
             if (input.ValuesInput.Remove(param.Type.ID))
-                Logs.Verbose($"{Prefix}Removed redundant param '{param.Type.ID}' as it was set to the default");
+                Logs.Verbose($"{ExtensionPrefix}Removed redundant param '{param.Type.ID}' as it was set to the default");
         return value;
     }
     
@@ -71,13 +74,51 @@ public static class ReactorParams
     {
         // Define required nodes
         ComfyUIBackendExtension.NodeToFeatureMap["ReActorFaceSwapOpt"] = FeatureId;
+        string oldNodePath = Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, $"{ComfyUIBackendExtension.Folder}/DLNodes/comfyui-reactor-node");
+        string newNodePath = Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, $"{ComfyUIBackendExtension.Folder}/DLNodes/ComfyUI-ReActor");
+        string nodeUrl = "https://github.com/Gourieff/ComfyUI-ReActor";
         
         // Add required custom node as installable feature
-        InstallableFeatures.RegisterInstallableFeature(new("ReActor", FeatureId, "https://github.com/Gourieff/comfyui-reactor-node", "Gourieff", "This will install the ReActor ComfyUI node developed by Gourieff.\nDo you wish to install?"));
+        InstallableFeatures.RegisterInstallableFeature(new("ReActor", FeatureId, nodeUrl, "Gourieff", $"This will install the ComfyUI-ReActor node developed by Gourieff from {nodeUrl}.\nDo you wish to install?"));
+        
+        // If the old repository is installed remove it as it's unsupported and will pop up Github login windows
+        if (Directory.Exists(oldNodePath))
+        {
+            Logs.Init($"{ExtensionPrefix}Moving deprecated ReActor repository to recycle bin '{oldNodePath}', click the 'Install ReActor' button in the parameter list to install its replacement");
+            bool success = false;
+            try
+            {
+                FileSystem.DeleteDirectory(oldNodePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.ThrowException);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Error($"{ExtensionPrefix}Failed to move '{oldNodePath}' folder to recycle bin, will try to delete permanently -- error was {ex.ReadableString()}");
+            }
+
+            try
+            {
+                // If the previous operation was unsuccessful and the folder still exists try an alternative method to delete
+                if (!success && Directory.Exists(oldNodePath))
+                {
+                    // This is required as git objects are marked readonly and prevent Directory.Delete from working
+                    Logs.Init($"{ExtensionPrefix}Removing ReadOnly attribute from all files/directories in '{oldNodePath}'");
+                    var directory = new DirectoryInfo(oldNodePath);
+                    foreach (var info in directory.GetFileSystemInfos("*", SearchOption.AllDirectories))
+                        info.Attributes = FileAttributes.Normal;
+                    Logs.Init($"{ExtensionPrefix}Deleting directory '{oldNodePath}'");
+                    directory.Delete(true);
+                    Logs.Init($"{ExtensionPrefix}Successfully deleted directory '{oldNodePath}'");
+                }
+            } catch (Exception ex)
+            {
+                Logs.Error($"{ExtensionPrefix}Could not delete '{oldNodePath}', please remove this folder manually then reboot SwarmUI -- error was {ex.ReadableString()}");
+            }
+        }
         
         // Prevents install button from being shown during backend load if it looks like it was installed
         // it will appear if the backend loads and the backend reports it's not installed
-        if (Directory.Exists(Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, $"{ComfyUIBackendExtension.Folder}/DLNodes/comfyui-reactor-node")))
+        if (Directory.Exists(newNodePath))
         {
             ComfyUIBackendExtension.FeaturesSupported.UnionWith([FeatureId]);
             ComfyUIBackendExtension.FeaturesDiscardIfNotFound.UnionWith([FeatureId]);
@@ -330,7 +371,7 @@ public static class ReactorParams
                     // Image has priority over model if both provided
                     hasModel = false;
                     if (g.UserInput.ValuesInput.Remove(FaceModel.Type.ID))
-                        Logs.Verbose($"{Prefix}Removed redundant param '{FaceModel.Type.ID}' as it was skipped due to {FaceImage.Type.ID} being provided");
+                        Logs.Verbose($"{ExtensionPrefix}Removed redundant param '{FaceModel.Type.ID}' as it was skipped due to {FaceImage.Type.ID} being provided");
                 }
 
                 if (hasModel)
@@ -357,7 +398,7 @@ public static class ReactorParams
                 else
                 {
                     if (g.UserInput.ValuesInput.Remove(FaceBoostRestoreAfterMain.Type.ID)) 
-                        Logs.Verbose($"{Prefix}Removed redundant param '{FaceBoostRestoreAfterMain.Type.ID}' as it wasn't used");
+                        Logs.Verbose($"{ExtensionPrefix}Removed redundant param '{FaceBoostRestoreAfterMain.Type.ID}' as it wasn't used");
                 }
 
                 string optionsNode = g.CreateNode("ReActorOptions", new JObject
@@ -402,7 +443,7 @@ public static class ReactorParams
                 // Remove parameters from the user input that were not utilised to keep things clean
                 foreach (var param in faceSwapParams)
                     if (g.UserInput.ValuesInput.Remove(param.ID))
-                        Logs.Verbose($"{Prefix}Removed redundant param '{param.ID}' as face swap was not used");
+                        Logs.Verbose($"{ExtensionPrefix}Removed redundant param '{param.ID}' as face swap was not used");
             }
 
             // Inserts a second face restore model into the chain
