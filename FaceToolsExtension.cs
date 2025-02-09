@@ -15,6 +15,7 @@ public class FaceToolsExtension : Extension
     public const string ExtensionPrefix = "[FaceTools] ";
     public const string Prefix = "[ReActor] ";
     public const string FeatureId = "reactor";
+    public static string ModelHashCacheLocation;
 
     public static T2IRegisteredParam<Image> FaceImage;
     public static T2IRegisteredParam<double> FaceRestoreVisibility, CodeFormerWeight;
@@ -49,6 +50,7 @@ public class FaceToolsExtension : Extension
     
     public override void OnInit()
     {
+        ModelHashCacheLocation = Path.Combine(Environment.CurrentDirectory, FilePath, "ModelHashCache.json");
         ScriptFiles.Add("assets/facetools.js");
         
         // Define required nodes
@@ -329,6 +331,35 @@ public class FaceToolsExtension : Extension
             bool hasModel = g.UserInput.TryGet(FaceModel, out string faceModel);
             var faceSwapModel = g.UserInput.GetAndRemoveIfDefault(FaceSwapModel);
             
+            // If we are not running a checkpoint model load check the integrity of models
+            // This can be detected when 0 or 1 steps, doNotSave is true and prompt is "(load the model please)"
+            // This is done because exceptions thrown during a checkpoint model load get replaced with a generic failed to load model message
+            var isLoadingCheckpoint = g.UserInput.TryGet(T2IParamTypes.Steps, out int steps) && steps <= 1 ||
+                                      g.UserInput.TryGet(T2IParamTypes.DoNotSave, out bool doNotSave) && doNotSave &&
+                                      g.UserInput.TryGet(T2IParamTypes.Prompt, out string prompt) && prompt == "(load the model please)";
+            if (!isLoadingCheckpoint)
+            {
+                try
+                {
+                    if (hasFaceRestoreModel)
+                        Utils.ValidateModel($"dlbackend/comfy/ComfyUI/models/facerestore_models/{faceRestoreModel}");
+                    if ((hasImage || hasModel) && !string.IsNullOrWhiteSpace(faceSwapModel))
+                    {
+                        Utils.ValidateModel($"dlbackend/comfy/ComfyUI/models/insightface/{faceSwapModel}");
+                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/1k3d68.onnx");
+                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/2d106det.onnx");
+                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/det_10g.onnx");
+                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/genderage.onnx");
+                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/w600k_r50.onnx");
+                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/nsfw_detector/vit-base-nsfw-detector/model.safetensors");
+                    }
+                }
+                finally
+                {
+                    Utils.SaveHashCache();
+                }
+            }
+
             // Only work if either of these are passed
             if (!hasFaceRestoreModel && !hasImage && !hasModel)
                 return;
