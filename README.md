@@ -6,6 +6,30 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 ## Changelog
 <details>
+  <summary>9 February 2025</summary>
+
+* Added checksum validation for all models that ReActor autodownloads to warn users of corruption that cause cryptic errors, if you have a corrupted model you will see an error like this instructing you what to do:
+
+![image](https://github.com/user-attachments/assets/1baa33a3-c65a-4b8a-a868-42fb4bff879a)
+
+Technical details:
+* The validation runs when you generate an image, if you have a corrupted model it will interrupt image generation and show the error shown above, it only validates the models currently being used by your workflow. 
+* The first time you generate an image the initial checksum generation will take a few seconds and it will log to the console as it's working:
+```
+[Info] [FaceTools] Generated hash for 'dlbackend/comfy/ComfyUI/models/facerestore_models/codeformer-v0.1.0.pth' 1009e537 (Took 1.7 seconds)
+[Info] [FaceTools] Generated hash for 'dlbackend/comfy/ComfyUI/models/insightface/inswapper_128.onnx' e4a3f08c (Took 2.4 seconds)
+[Info] [FaceTools] Generated hash for 'dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/1k3d68.onnx' df5c06b8 (Took 0.6 seconds)
+[Info] [FaceTools] Generated hash for 'dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/2d106det.onnx' f001b856 (Took 0.0 seconds)
+[Info] [FaceTools] Generated hash for 'dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/det_10g.onnx' 5838f7fe (Took 0.1 seconds)
+[Info] [FaceTools] Generated hash for 'dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/genderage.onnx' 4fde69b1 (Took 0.0 seconds)
+[Info] [FaceTools] Generated hash for 'dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/w600k_r50.onnx' 4c06341c (Took 0.8 seconds)
+[Info] [FaceTools] Generated hash for 'dlbackend/comfy/ComfyUI/models/nsfw_detector/vit-base-nsfw-detector/model.safetensors' 266efb8b (Took 1.5 seconds)
+```
+* Generated checksums are cached to `'SwarmUI/src/Extensions/SwarmUI-FaceTools/ModelHashCache.json'` and are only recalculated if the file is modified.
+* Models are only validated if you are using the built in ComfyUI backend, if ComdyUI is not at `SwarmUI/dlbackend/comfy/ComfyUI/` validation will be skipped for users with external ComfyUI installs.
+
+</details>
+<details>
   <summary>24 January 2025</summary>
 
 * **[Notice]** The old ReActor repository (https://github.com/Gourieff/comfyui-reactor-node) was removed from GitHub, an updated version with a filter for unsafe content that is compliant with [GitHub rules](https://docs.github.com/en/site-policy/acceptable-use-policies/github-misinformation-and-disinformation#synthetic--manipulated-media-tools) has been made: https://github.com/Gourieff/ComfyUI-ReActor. If you have the old node installed (You installed prior to 17-01-2024) you will see the following message on SwarmUI startup as it removes the old node so you can install the new one:
