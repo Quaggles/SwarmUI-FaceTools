@@ -327,6 +327,7 @@ public class FaceToolsExtension : Extension
         {
             // Get these parameters first to determine if we should run
             bool hasFaceRestoreModel = g.UserInput.TryGet(FaceRestoreModel, out string faceRestoreModel) && faceRestoreModel != "none";
+            var hasFaceRestoreModelExtra = g.UserInput.TryGet(SecondFaceRestoreModel, out string faceRestoreModelExtra) && faceRestoreModelExtra != "none";
             bool hasImage = g.UserInput.TryGet(FaceImage, out Image inputImage);
             bool hasModel = g.UserInput.TryGet(FaceModel, out string faceModel);
             var faceSwapModel = g.UserInput.GetAndRemoveIfDefault(FaceSwapModel);
@@ -343,6 +344,8 @@ public class FaceToolsExtension : Extension
                 {
                     if (hasFaceRestoreModel)
                         Utils.ValidateModel($"dlbackend/comfy/ComfyUI/models/facerestore_models/{faceRestoreModel}");
+                    if (hasFaceRestoreModelExtra)
+                        Utils.ValidateModel($"dlbackend/comfy/ComfyUI/models/facerestore_models/{faceRestoreModelExtra}");
                     if ((hasImage || hasModel) && !string.IsNullOrWhiteSpace(faceSwapModel))
                     {
                         Utils.ValidateModel($"dlbackend/comfy/ComfyUI/models/insightface/{faceSwapModel}");
@@ -457,7 +460,7 @@ public class FaceToolsExtension : Extension
             }
 
             // Inserts a second face restore model into the chain
-            if (g.UserInput.TryGet(SecondFaceRestoreModel, out string faceRestoreModelExtra))
+            if (hasFaceRestoreModelExtra)
             {
                 string restoreFace = g.CreateNode("ReActorRestoreFace", new JObject
                 {
