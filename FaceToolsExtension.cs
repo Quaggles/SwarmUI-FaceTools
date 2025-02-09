@@ -331,6 +331,18 @@ public class FaceToolsExtension : Extension
             bool hasImage = g.UserInput.TryGet(FaceImage, out Image inputImage);
             bool hasModel = g.UserInput.TryGet(FaceModel, out string faceModel);
             var faceSwapModel = g.UserInput.GetAndRemoveIfDefault(FaceSwapModel);
+
+            // Only work if either of these are passed
+            if (!hasFaceRestoreModel && !hasImage && !hasModel)
+                return;
+            
+            if (!g.Features.Contains(FeatureId))
+                throw new SwarmUserErrorException("ReActor parameters specified, but feature isn't installed");
+            
+            // Get parameters used in multiple branches below
+            double faceRestoreVisibility = g.UserInput.GetAndRemoveIfDefault(FaceRestoreVisibility);
+            double codeFormerWeight = g.UserInput.GetAndRemoveIfDefault(CodeFormerWeight);
+            string faceDetectionModel = g.UserInput.GetAndRemoveIfDefault(FaceDetectionModel);
             
             // If we are not running a checkpoint model load check the integrity of models
             // This can be detected when 0 or 1 steps, doNotSave is true and prompt is "(load the model please)"
@@ -363,17 +375,6 @@ public class FaceToolsExtension : Extension
                 }
             }
 
-            // Only work if either of these are passed
-            if (!hasFaceRestoreModel && !hasImage && !hasModel)
-                return;
-            
-            if (!g.Features.Contains(FeatureId))
-                throw new SwarmUserErrorException("ReActor parameters specified, but feature isn't installed");
-            
-            // Get parameters used in multiple branches below
-            double faceRestoreVisibility = g.UserInput.GetAndRemoveIfDefault(FaceRestoreVisibility);
-            double codeFormerWeight = g.UserInput.GetAndRemoveIfDefault(CodeFormerWeight);
-            string faceDetectionModel = g.UserInput.GetAndRemoveIfDefault(FaceDetectionModel);
             JArray reactorOutput = null;
             if (hasImage || hasModel) // If user passed in an image/model do face swap
             {
