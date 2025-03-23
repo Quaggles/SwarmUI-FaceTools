@@ -16,6 +16,7 @@ public class FaceToolsExtension : Extension
     public const string Prefix = "[ReActor] ";
     public const string FeatureId = "reactor";
     public static string ModelHashCacheLocation;
+    public const int FaceToolsNodeIndex = 51000; // If you are copying this code pick a different index to prevents nodes trying to use the same ids
 
     public static T2IRegisteredParam<Image> FaceImage;
     public static T2IRegisteredParam<double> FaceRestoreVisibility, CodeFormerWeight;
@@ -381,7 +382,7 @@ public class FaceToolsExtension : Extension
                 string sourceNode = null;
                 if (hasImage)
                 {
-                    sourceNode = g.CreateLoadImageNode(inputImage, "image", true);
+                    sourceNode = g.CreateLoadImageNode(inputImage, "image", true, g.GetStableDynamicID(FaceToolsNodeIndex, 0));
                     // Image has priority over model if both provided
                     hasModel = false;
                     if (g.UserInput.ValuesInput.Remove(FaceModel.Type.ID))
@@ -393,7 +394,7 @@ public class FaceToolsExtension : Extension
                     sourceNode = g.CreateNode("ReActorLoadFaceModel", new JObject
                     {
                         ["face_model"] = faceModel
-                    });
+                    }, g.GetStableDynamicID(FaceToolsNodeIndex, 1));
                 }
 
                 string faceBoostNode = null;
@@ -407,7 +408,7 @@ public class FaceToolsExtension : Extension
                         ["visibility"] = faceRestoreVisibility,
                         ["codeformer_weight"] = codeFormerWeight,
                         ["restore_with_main_after"] = g.UserInput.Get(FaceBoostRestoreAfterMain)
-                    });
+                    }, g.GetStableDynamicID(FaceToolsNodeIndex, 2));
                 }
                 else
                 {
@@ -424,7 +425,7 @@ public class FaceToolsExtension : Extension
                     ["source_faces_index"] = g.UserInput.GetAndRemoveIfDefault(SourceFacesIndex),
                     ["detect_gender_source"] = g.UserInput.GetAndRemoveIfDefault(SourceGenderDetect),
                     ["console_log_level"] = 1,
-                });
+                }, g.GetStableDynamicID(FaceToolsNodeIndex, 3));
 
                 string reactorNode = g.CreateNode("ReActorFaceSwapOpt", new JObject
                 {
@@ -439,7 +440,7 @@ public class FaceToolsExtension : Extension
                     ["face_restore_model"] = faceRestoreModel,
                     ["face_restore_visibility"] = faceRestoreVisibility,
                     ["codeformer_weight"] = codeFormerWeight,
-                });
+                }, g.GetStableDynamicID(FaceToolsNodeIndex, 4));
                 reactorOutput = [reactorNode, 0];
             }
             else // If a face restore model was provided just do that
@@ -451,7 +452,7 @@ public class FaceToolsExtension : Extension
                     ["model"] = faceRestoreModel,
                     ["visibility"] = faceRestoreVisibility,
                     ["codeformer_weight"] = codeFormerWeight
-                });
+                }, g.GetStableDynamicID(FaceToolsNodeIndex, 5));
                 reactorOutput = [restoreFace, 0];
                 
                 // Remove parameters from the user input that were not utilised to keep things clean
@@ -470,7 +471,7 @@ public class FaceToolsExtension : Extension
                     ["model"] = faceRestoreModelExtra,
                     ["visibility"] = faceRestoreVisibility,
                     ["codeformer_weight"] = codeFormerWeight
-                });
+                }, g.GetStableDynamicID(FaceToolsNodeIndex, 6));
                 reactorOutput = [restoreFace, 0];
             }
 
@@ -482,7 +483,7 @@ public class FaceToolsExtension : Extension
                     ["image"] = g.FinalImageOut,
                     ["model_name"] = faceMaskModel,
                     ["index"] = 0,
-                });
+                }, g.GetStableDynamicID(FaceToolsNodeIndex, 7));
                 string maskNode = g.CreateNode("ReActorMaskHelper", new JObject
                 {
                     ["image"] = g.FinalImageOut,
@@ -503,7 +504,7 @@ public class FaceToolsExtension : Extension
                     ["blur_radius"] = 9,
                     ["sigma_factor"] = 1,
                     ["mask_optional"] = new JArray { swarmYoloMask, 0 },
-                });
+                }, g.GetStableDynamicID(FaceToolsNodeIndex, 8));
                 reactorOutput = [maskNode, 0];
             }
 
