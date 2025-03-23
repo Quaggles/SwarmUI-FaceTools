@@ -6,6 +6,13 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 ## Changelog
 <details>
+  <summary>23 March 2025</summary>
+  
+* Workflow generator now uses StableDynamicIDs to prevent breaking workflow caching (Being forced to regenerate the entire image) when FaceTools parameters are changed.
+  
+* Pinned ReActor at version 0.6.0-a1, this prevents SwarmUI from automatically updating ReActor to a future version that might break compatibility with the extension until it has been manually checked as compatible.
+</details>
+<details>
   <summary>9 February 2025</summary>
 
 * Added checksum validation for all models that ReActor autodownloads to warn users of corruption that cause cryptic errors, if you have a corrupted model you will see an error like this instructing you what to do:
