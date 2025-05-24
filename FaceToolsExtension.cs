@@ -406,7 +406,7 @@ public class FaceToolsExtension : Extension
                     sourceNode = g.CreateLoadImageNode(inputImage, "image", true, g.GetStableDynamicID(FaceToolsNodeIndex, 0));
                     // Image has priority over model if both provided
                     hasModel = false;
-                    if (g.UserInput.ValuesInput.Remove(FaceModel.Type.ID))
+                    if (g.UserInput.TryRemove(FaceModel.Type))
                         Logs.Verbose($"{ExtensionPrefix}Removed redundant param '{FaceModel.Type.ID}' as it was skipped due to {FaceImage.Type.ID} being provided");
                 }
 
@@ -433,7 +433,7 @@ public class FaceToolsExtension : Extension
                 }
                 else
                 {
-                    if (g.UserInput.ValuesInput.Remove(FaceBoostRestoreAfterMain.Type.ID)) 
+                    if (g.UserInput.TryRemove(FaceBoostRestoreAfterMain.Type)) 
                         Logs.Verbose($"{ExtensionPrefix}Removed redundant param '{FaceBoostRestoreAfterMain.Type.ID}' as it wasn't used");
                 }
 
@@ -478,7 +478,7 @@ public class FaceToolsExtension : Extension
                 
                 // Remove parameters from the user input that were not utilised to keep things clean
                 foreach (var param in faceSwapParams)
-                    if (g.UserInput.ValuesInput.Remove(param.ID))
+                    if (g.UserInput.TryRemove(param))
                         Logs.Verbose($"{ExtensionPrefix}Removed redundant param '{param.ID}' as face swap was not used");
             }
 
