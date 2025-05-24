@@ -2,6 +2,7 @@
 using System.IO;
 using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json.Linq;
+using SwarmUI.Backends;
 using SwarmUI.Builtin_ComfyUIBackend;
 using SwarmUI.Text2Image;
 using SwarmUI.Utils;
@@ -345,6 +346,25 @@ public class FaceToolsExtension : Extension
             double faceRestoreVisibility = g.UserInput.GetAndRemoveIfDefault(FaceRestoreVisibility);
             double codeFormerWeight = g.UserInput.GetAndRemoveIfDefault(CodeFormerWeight);
             string faceDetectionModel = g.UserInput.GetAndRemoveIfDefault(FaceDetectionModel);
+
+            // If the user is trying to use inswapper_128 download it in all the backend folders
+            if ((hasImage || hasModel) && faceSwapModel == "inswapper_128.onnx")
+            {
+                // We can't store inswapper in the SwarmUI root since ReActor doesn't support forwarding the paths so we have to download for all self start backends
+                foreach (var (id, data) in Program.Backends.T2IBackends)
+                {
+                    if (data.Backend.Status is not BackendStatus.DISABLED and not BackendStatus.ERRORED && data.Backend is ComfyUISelfStartBackend comfyUiSelfStartBackend)
+                    {
+                        var modelLocation = Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, comfyUiSelfStartBackend.ComfyPathBase, "models/insightface/inswapper_128.onnx");
+                        if (!File.Exists(modelLocation))
+                        {
+                            Logs.Info($"{ExtensionPrefix}Downloading {faceSwapModel} for backend #{id} '{data.Backend.Title}' to '{modelLocation}'");
+                            g.DownloadModel(faceSwapModel, modelLocation, "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx",
+                                "e4a3f08c753cb72d04e10aa0f7dbe3deebbf39567d4ead6dce08e98aa49e16af");
+                        }
+                    }
+                }
+            }
             
             // If we are not running a checkpoint model load check the integrity of models
             // This can be detected when 0 or 1 steps, doNotSave is true and prompt is "(load the model please)"
