@@ -6,6 +6,21 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 ## Changelog
 <details>
+  <summary>25 May 2025</summary>
+
+<b><i>Make sure you update SwarmUI to at least v0.9.6.1 before updating to this version of FaceTools as it uses new APIs</b></i>
+
+* Added automatic model downloading and corrupted model replacement for FaceRestore and FaceSwap models
+
+Any FaceRestore and FaceSwap models that ReActor did not download (Or downloaded partially leaving corrupted) will be downloaded by FaceTools when a generation that requires them is started.
+
+This includes the FaceSwap model `inswapper_128` which previously needed to be manually downloaded and alternative FaceSwap models like `reswapper_128` and `reswapper_256` which now show in the dropdown, check the Server->Logs tab for download progress if you start a generation, and it's sitting for a long time. Models will be downloaded into all ComfyUISelfStart backends that are running.
+
+* Model checksum validation now works for all ComfyUISelfStart backends instead of only the built-in one
+
+* Fixed code calling internal T2IParamInput.ValuesInput field that will be removed in a future SwarmUI update
+</details>
+<details>
   <summary>23 March 2025</summary>
   
 * Workflow generator now uses StableDynamicIDs to prevent breaking workflow caching (Being forced to regenerate the entire image) when FaceTools parameters are changed.
@@ -76,9 +91,7 @@ Technical details:
 
 ![image](https://github.com/user-attachments/assets/048df53e-57bf-4758-8f09-ec22b53e1263)
 
-6. Download `inswapper_128.onnx` from https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models and put it here: `SwarmUI/dlbackend/comfy/ComfyUI/models/insightface/inswapper_128.onnx`
-
-7. If you run into issues check the [Troubleshooting section](#troubleshooting)
+6. If you run into issues check the [Troubleshooting section](#troubleshooting)
 
 ## Installation (Manual)
 
@@ -136,6 +149,10 @@ SwarmUI will update ReActor automatically if you have AutoUpdate enabled for the
 ### I see a black image result from the face swap
 
 This is not a bug, ReActor returns a black image when the NSFW detector detects unsafe content in the source image to comply with [GitHub rules](https://docs.github.com/en/site-policy/acceptable-use-policies/github-misinformation-and-disinformation#synthetic--manipulated-media-tools).
+
+### The ReActor parameter group appears when SwarmUI is started and then disappears when the backend loads
+
+This occurs when ReActor fails to import in the ComfyUI backend, go to Server->Logs and set the view to `Debug` to see the error and see if any of the troubleshooting entries here help
 
 ### ModuleNotFoundError: No module named 'insightface'
 
