@@ -37,8 +37,8 @@ public class FaceToolsExtension : Extension
     public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain, RemoveParamsIfDefault;
     
     // Prepopulated with options that should always exist
-    public static List<string> FaceRestoreModels = ["none", "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx"]; // Should have been autodownloaded by node on ComfyUI start
-    public static List<string> FaceSwapModels = ["inswapper_128.onnx"];
+    public static List<string> FaceRestoreModels = ["none", "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx", "GPEN-BFR-1024.onnx", "GPEN-BFR-2048.onnx"];
+    public static List<string> FaceSwapModels = ["inswapper_128.onnx", "reswapper_128.onnx", "reswapper_256.onnx"];
     public static List<string> FaceModels = ["none"];
     public static List<string> FaceDetectionModels = ["retinaface_resnet50", "retinaface_mobile0.25", "YOLOv5l", "YOLOv5n"];
     public static List<string> GenderDetectOptions = ["no", "female", "male"];
@@ -333,7 +333,7 @@ public class FaceToolsExtension : Extension
             var hasFaceRestoreModelExtra = g.UserInput.TryGet(SecondFaceRestoreModel, out string faceRestoreModelExtra) && faceRestoreModelExtra != "none";
             bool hasImage = g.UserInput.TryGet(FaceImage, out Image inputImage);
             bool hasModel = g.UserInput.TryGet(FaceModel, out string faceModel);
-            var faceSwapModel = g.UserInput.GetAndRemoveIfDefault(FaceSwapModel);
+            var faceSwapModel = g.UserInput.Get(FaceSwapModel);
 
             // Only work if either of these are passed
             if (!hasFaceRestoreModel && !hasImage && !hasModel)
@@ -346,25 +346,6 @@ public class FaceToolsExtension : Extension
             double faceRestoreVisibility = g.UserInput.GetAndRemoveIfDefault(FaceRestoreVisibility);
             double codeFormerWeight = g.UserInput.GetAndRemoveIfDefault(CodeFormerWeight);
             string faceDetectionModel = g.UserInput.GetAndRemoveIfDefault(FaceDetectionModel);
-
-            // If the user is trying to use inswapper_128 download it in all the backend folders
-            if ((hasImage || hasModel) && faceSwapModel == "inswapper_128.onnx")
-            {
-                // We can't store inswapper in the SwarmUI root since ReActor doesn't support forwarding the paths so we have to download for all self start backends
-                foreach (var (id, data) in Program.Backends.T2IBackends)
-                {
-                    if (data.Backend.Status is not BackendStatus.DISABLED and not BackendStatus.ERRORED && data.Backend is ComfyUISelfStartBackend comfyUiSelfStartBackend)
-                    {
-                        var modelLocation = Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, comfyUiSelfStartBackend.ComfyPathBase, "models/insightface/inswapper_128.onnx");
-                        if (!File.Exists(modelLocation))
-                        {
-                            Logs.Info($"{ExtensionPrefix}Downloading {faceSwapModel} for backend #{id} '{data.Backend.Title}' to '{modelLocation}'");
-                            g.DownloadModel(faceSwapModel, modelLocation, "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx",
-                                "e4a3f08c753cb72d04e10aa0f7dbe3deebbf39567d4ead6dce08e98aa49e16af");
-                        }
-                    }
-                }
-            }
             
             // If we are not running a checkpoint model load check the integrity of models
             // This can be detected when 0 or 1 steps, doNotSave is true and prompt is "(load the model please)"
@@ -377,18 +358,21 @@ public class FaceToolsExtension : Extension
                 try
                 {
                     if (hasFaceRestoreModel)
-                        Utils.ValidateModel($"dlbackend/comfy/ComfyUI/models/facerestore_models/{faceRestoreModel}");
+                        Utils.DownloadOrValidateModel(g,$"models/facerestore_models/{faceRestoreModel}");
                     if (hasFaceRestoreModelExtra)
-                        Utils.ValidateModel($"dlbackend/comfy/ComfyUI/models/facerestore_models/{faceRestoreModelExtra}");
+                        Utils.DownloadOrValidateModel(g, $"models/facerestore_models/{faceRestoreModelExtra}");
                     if ((hasImage || hasModel) && !string.IsNullOrWhiteSpace(faceSwapModel))
                     {
-                        Utils.ValidateModel($"dlbackend/comfy/ComfyUI/models/insightface/{faceSwapModel}");
-                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/1k3d68.onnx");
-                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/2d106det.onnx");
-                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/det_10g.onnx");
-                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/genderage.onnx");
-                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/insightface/models/buffalo_l/w600k_r50.onnx");
-                        Utils.ValidateModel("dlbackend/comfy/ComfyUI/models/nsfw_detector/vit-base-nsfw-detector/model.safetensors");
+                        if (faceSwapModel.StartsWith("reswapper_"))
+                            Utils.DownloadOrValidateModel(g, $"models/reswapper/{faceSwapModel}");
+                        else
+                            Utils.DownloadOrValidateModel(g, $"models/insightface/{faceSwapModel}");
+                        Utils.DownloadOrValidateModel(g, $"models/insightface/models/buffalo_l/1k3d68.onnx");
+                        Utils.DownloadOrValidateModel(g, $"models/insightface/models/buffalo_l/2d106det.onnx");
+                        Utils.DownloadOrValidateModel(g, $"models/insightface/models/buffalo_l/det_10g.onnx");
+                        Utils.DownloadOrValidateModel(g, $"models/insightface/models/buffalo_l/genderage.onnx");
+                        Utils.DownloadOrValidateModel(g, $"models/insightface/models/buffalo_l/w600k_r50.onnx");
+                        Utils.DownloadOrValidateModel(g, $"models/nsfw_detector/vit-base-nsfw-detector/model.safetensors");
                     }
                 }
                 finally
