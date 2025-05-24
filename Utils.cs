@@ -28,6 +28,7 @@ public static class Utils
     
     private static ConcurrentDictionary<string, CacheData> modelHashCache;
     private static bool cacheDirty = false;
+    private const int CacheFormatVersion = 1;
 
     private record struct CacheData
     {
@@ -91,7 +92,10 @@ public static class Utils
                     {
                         var cacheJson = File.ReadAllText(FaceToolsExtension.ModelHashCacheLocation);
                         var cacheObject = JsonConvert.DeserializeObject<SerializedCache>(cacheJson);
-                        modelHashCache = cacheObject.ModelHashCache;
+                        if (cacheObject.CacheFormatVersion != CacheFormatVersion) // Discard cache if format out of date
+                            modelHashCache = new();
+                        else
+                            modelHashCache = cacheObject.ModelHashCache;
                     }
                 }
                 catch (Exception ex)
@@ -145,7 +149,7 @@ public static class Utils
         {
             try
             {
-                var json = JsonConvert.SerializeObject(new SerializedCache { ModelHashCache = modelHashCache, CacheFormatVersion = 1 }, Formatting.Indented);
+                var json = JsonConvert.SerializeObject(new SerializedCache { ModelHashCache = modelHashCache, CacheFormatVersion = CacheFormatVersion }, Formatting.Indented);
                 lock (ModelHashCacheFileLock)
                 {
                     Logs.Verbose($"{FaceToolsExtension.ExtensionPrefix}Updating hash cache file");
