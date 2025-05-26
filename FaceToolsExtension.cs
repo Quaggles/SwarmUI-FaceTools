@@ -387,7 +387,7 @@ public class FaceToolsExtension : Extension
                 string sourceNode = null;
                 if (hasImage)
                 {
-                    sourceNode = g.CreateLoadImageNode(inputImage, "image", true, g.GetStableDynamicID(FaceToolsNodeIndex, 0));
+                    sourceNode = g.CreateLoadImageNode(inputImage, $"${{{FaceImage.Type.ID}}}", false, g.GetStableDynamicID(FaceToolsNodeIndex, 0));
                     // Image has priority over model if both provided
                     hasModel = false;
                     if (g.UserInput.TryRemove(FaceModel.Type))
