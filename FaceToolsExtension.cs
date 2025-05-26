@@ -489,26 +489,14 @@ public class FaceToolsExtension : Extension
                     ["model_name"] = faceMaskModel,
                     ["index"] = 0,
                 }, g.GetStableDynamicID(FaceToolsNodeIndex, 7));
-                string maskNode = g.CreateNode("ReActorMaskHelper", new JObject
+                string maskNode = g.CreateNode("ImageCompositeMasked", new JObject
                 {
-                    ["image"] = g.FinalImageOut,
-                    ["swapped_image"] = reactorOutput,
-                    ["bbox_model_name"] = "",
-                    ["bbox_threshold"] = 0.5,
-                    ["bbox_dilation"] = 10,
-                    ["bbox_crop_factor"] = 3,
-                    ["bbox_drop_size"] = 10,
-                    ["sam_model_name"] = "",
-                    ["sam_dilation"] = 0,
-                    ["sam_threshold"] = 0.93,
-                    ["bbox_expansion"] = 0,
-                    ["mask_hint_threshold"] = 0.7,
-                    ["mask_hint_use_negative"] = "False",
-                    ["morphology_operation"] = "dilate",
-                    ["morphology_distance"] = 0,
-                    ["blur_radius"] = 9,
-                    ["sigma_factor"] = 1,
-                    ["mask_optional"] = new JArray { swarmYoloMask, 0 },
+                    ["destination"] = g.FinalImageOut,
+                    ["source"] = reactorOutput,
+                    ["mask"] = new JArray { swarmYoloMask, 0 },
+                    ["x"] = 0,
+                    ["y"] = 0,
+                    ["resize_source"] = false,
                 }, g.GetStableDynamicID(FaceToolsNodeIndex, 8));
                 reactorOutput = [maskNode, 0];
             }
