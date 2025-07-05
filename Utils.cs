@@ -164,7 +164,7 @@ public static class Utils
         var startGenerateTime = DateTime.UtcNow;
         using FileStream reader = File.OpenRead(absolutePath);
         var hash = Utilities.BytesToHex(SHA256.HashData(reader));
-        Logs.Info($"{FaceToolsExtension.ExtensionPrefix}Generated hash{hash.Substring(0, 8)} (Took {(DateTime.UtcNow - startGenerateTime).TotalSeconds:F1} seconds) for '{absolutePath}'");
+        Logs.Info($"{FaceToolsExtension.ExtensionPrefix}Generated hash {hash.Substring(0, 8)} (Took {(DateTime.UtcNow - startGenerateTime).TotalSeconds:F1} seconds) for '{absolutePath}'");
         
         // Update hash cache
         var newCacheData = new CacheData { HashSha256 = hash, LastWriteTime = info.LastWriteTime.ToFileTimeUtc(), FileSize = info.Length };
