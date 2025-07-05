@@ -48,7 +48,7 @@ Technical details:
 [Info] [FaceTools] Generated hash for 'dlbackend/comfy/ComfyUI/models/nsfw_detector/vit-base-nsfw-detector/model.safetensors' 266efb8b (Took 1.5 seconds)
 ```
 * Generated checksums are cached to `'SwarmUI/src/Extensions/SwarmUI-FaceTools/ModelHashCache.json'` and are only recalculated if the file is modified.
-* Models are only validated if you are using the built in ComfyUI backend, if ComdyUI is not at `SwarmUI/dlbackend/comfy/ComfyUI/` validation will be skipped for users with external ComfyUI installs.
+* Models are only validated if you are using the built in ComfyUI backend, if ComfyUI is not at `SwarmUI/dlbackend/comfy/ComfyUI/` validation will be skipped for users with external ComfyUI installs.
 
 </details>
 <details>
@@ -80,18 +80,16 @@ Technical details:
 
 ## Installation (Simple)
 
-1. In SwarmUI go to the Server/Extensions tab
+1. In SwarmUI go to the `Server->Extensions` tab
 2. Find FaceTools in the list and click the 'Install' button
 3. Refresh the page and go back to the generate tab, if you see the parameters then the required ComfyUI dependencies are installed and you can start using the extension, otherwise continue below.
-4. If dependencies are not installed buttons will be shown in the parameter group to install them. The 'Install IP Adapter' button will be shown first if it's not installed, install it and once the backend restarts refresh the page.
+4. If dependencies are not installed buttons will be shown in the parameter group to install them. Install IP Adapter first and once the backend has restarted install ReActor.
 
-![image](https://github.com/user-attachments/assets/fe396a47-6f62-453c-976e-fe99e2d3e15d)
+![image](https://github.com/user-attachments/assets/5d69ac34-2d2e-4eb2-8b62-c22f189b15e0)
 
-5. If ReActor is not installed a button will be shown, click install and monitor the progress by going to the `Server/Logs` tab and setting the view to `Debug`, it will automatically start downloading models so this might take a while, if this takes too long SwarmUI might say `Some backends have errored on the server. Check the server logs for details` just leave it until the downloads finish and then restart SwarmUI.
-
-![image](https://github.com/user-attachments/assets/048df53e-57bf-4758-8f09-ec22b53e1263)
-
-6. If you run into issues check the [Troubleshooting section](#troubleshooting)
+6. After ReActor installs it automatically starts downloading some of the models, you can monitor the progress by going to the `Server->Logs` tab and setting the view to `Debug`.
+7. You should be good to go, check the [Usage section](#usage) for tips
+8. If you run into issues (Such as not being able to see the parameter group) check the [Troubleshooting section](#troubleshooting)
 
 ## Installation (Manual)
 
@@ -120,7 +118,7 @@ If `Second Face Restore Model` (Advanced option) is set then a second face resto
 
 If `Face Mask Model` is set the face swap and face restore will be masked so it doesn't effect overlapping features like hair. If the dropdown is empty download models from here: [YOLOv8 Segmentation models](https://github.com/hben35096/assets/releases/) and put them in `{SwarmUIModelRoot}/yolov8`
 
-If `Face Boost` is set itr estores the face after the face swap but before transplanting on the generated image, can increase quality but results may vary. A side effect of enabling this with <b>Restore After Main</b> disabled with is that only one face in the image will be restored or swapped
+If `Face Boost` is set it restores the face after the face swap but before transplanting on the generated image, can increase quality but results may vary. A side effect of enabling this with <b>Restore After Main</b> disabled with is that only one face in the image will be restored or swapped
 
 Many more parameters are available if you enable 'Advanced Options' at the bottom of the panel. All parameters have tooltips or read through the [ReActor readme](https://github.com/Gourieff/ComfyUI-ReActor) for more info, you can also use 'Comfy Workflow/Import From Generate Tab' feature to see what the parameters are doing in the ComfyUI workflow.
 
@@ -144,7 +142,7 @@ After installing a model make sure to click the model refresh button in SwarmUI 
 
 ## Troubleshooting
 
-SwarmUI will update ReActor automatically if you have AutoUpdate enabled for the ComfyUI backend. If you need to update the node manually or do manual troubleshooting steps it can be found in this folder `SwarmUI\src\BuiltinExtensions\ComfyUIBackend\DLNodes\ComfyUI-ReActor`.
+If you need to update the node manually or do manual troubleshooting steps it can be found in this folder `SwarmUI\src\BuiltinExtensions\ComfyUIBackend\DLNodes\ComfyUI-ReActor`.
 
 ### I see a black image result from the face swap
 
@@ -152,7 +150,7 @@ This is not a bug, ReActor returns a black image when the NSFW detector detects 
 
 ### The ReActor parameter group appears when SwarmUI is started and then disappears when the backend loads
 
-This occurs when ReActor fails to import in the ComfyUI backend, go to Server->Logs and set the view to `Debug` to see the error and see if any of the troubleshooting entries here help
+This occurs when ReActor fails to import in the ComfyUI backend, go to Server->Logs and set the view to `Debug` to see the error, if you can't solve it yourself check the [SwarmUI Discord](https://discord.gg/swarmui-1243166023859961988) (Look in the `Extensions->FaceTools` thread) or the [ReActor Github](https://github.com/Gourieff/ComfyUI-ReActor).
 
 ### ModuleNotFoundError: No module named 'insightface'
 
@@ -165,10 +163,6 @@ SwarmUI should install a precompiled insightface wheel when you click the 'Insta
 5. Run the command `python.exe -m pip install insightface`, if using Powershell you might need to prepend commands with `./` to ensure it doesn't find your global python install on PATH
 6. If all goes well this should compile insightface successfully and you can continue
 
-### ComfyUI execution error: `[ONNXRuntimeError] : 7 : INVALID_PROTOBUF : Load model from .../inswapper_128.onnx failed:Protobuf parsing failed`
-
-Try going to the folder in the error message and deleting the `inswapper_128.onnx` model and replacing it with a version downloaded directly from [here](https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models)
-
 ### An error occurs when clicking 'Generate' when using ReActor
 
 Read through the [ReActor Troubleshooting Guide](https://github.com/Gourieff/ComfyUI-ReActor#troubleshooting) and see if any match your error.
@@ -176,10 +170,6 @@ Read through the [ReActor Troubleshooting Guide](https://github.com/Gourieff/Com
 ### I get 'ComfyUI execution error CUDA_PATH is set but CUDA wasn't able to be loaded'
 
 I had this happen even when CUDA_PATH pointed to a valid CUDA toolkit installation, try going to 'System Properties/Environment Variables' and removing `CUDA_PATH` to see if it fixes your problem, this may effect other software finding CUDA.
-
-### I can't see the ReActor parameter groups
-
-Open the 'Comfy Workflow' tab and check that the relevant nodes can be added there, if you cannot add the nodes in the ComfyUI workflow then they are not installed correctly and you might need look through the [ReActor Github](https://github.com/Gourieff/ComfyUI-ReActor) or the [SwarmUI Discord](https://discord.gg/swarmui-1243166023859961988).
 
 ### If all else fails
 Ask for help on the [SwarmUI discord](https://discord.gg/swarmui-1243166023859961988)
