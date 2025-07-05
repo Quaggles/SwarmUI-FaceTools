@@ -1,24 +1,31 @@
-﻿postParamBuildSteps.push(() => {
+﻿addInstallButton('reactor', 'ipadapter', 'ipadapter', 'Install IP Adapter (Install first)');
+
+// The ReActor install button logic is a bit more complicated as it must only be installed after IP Adapter
+postParamBuildSteps.push(() => {
     let reactorGroup = document.getElementById('input_group_content_reactor');
-    if (reactorGroup) {
-        if (!currentBackendFeatureSet.includes('ipadapter')) {
-            reactorGroup.append(createDiv(`reactor_ipadapter_install_button`, 'keep_group_visible', `<button class="basic-button" onclick="installFeatureById('ipadapter', 'reactor_ipadapter_install_button')">Install IP Adapter</button>`));
+    if (reactorGroup && !currentBackendFeatureSet.includes('reactor')) {
+        // Disabled button by default
+        reactorGroup.append(createDiv(`reactor_install_button`, 'keep_group_visible', `<button disabled class="basic-button" onclick="installFeatureById('reactor', 'reactor_install_button')">Install ReActor</button>`));
+    }
+});
+hideParamCallbacks.push(() => {
+    let installButton = document.getElementById(`reactor_install_button`);
+    if (installButton) {
+        let button = installButton.querySelector("button");
+        if (button) {
+            // Hacky way to check if the feature is currently installing so we don't reenable the button during that process
+            let divs = installButton.querySelectorAll("div");
+            let reactorInstalling = false;
+            divs.forEach(div => {
+                if (div.textContent.includes("Installing...")) {
+                    reactorInstalling = true;
+                }
+            });
+            // Disables the button until ipadapter is installed
+            button.disabled = reactorInstalling || !currentBackendFeatureSet.includes('ipadapter');
         }
-        // IP Adapter needs to be installed first so only show this button if that's ready
-        if (currentBackendFeatureSet.includes('ipadapter') && !currentBackendFeatureSet.includes('reactor')) {
-            reactorGroup.append(createDiv(`reactor_install_button`, 'keep_group_visible', `<button class="basic-button" onclick="installFeatureById('reactor', 'reactor_install_button')">Install ReActor</button>`));
+        if (currentBackendFeatureSet.includes('reactor')) {
+            installButton.remove();
         }
     }
-    
-    // Disabled until PR is merged to fix this node working in differently named custom_node paths
-//    let facerestorecfGroup = document.getElementById('input_group_content_facerestorecf');
-//    if (facerestorecfGroup) {
-//        if (!currentBackendFeatureSet.includes('ipadapter')) {
-//            facerestorecfGroup.append(createDiv(`facerestorecf_ipadapter_install_button`, 'keep_group_visible', `<button class="basic-button" onclick="installFeatureById('ipadapter', 'facerestorecf_ipadapter_install_button')">Install IP Adapter</button>`));
-//        }
-//        // IP Adapter needs to be installed first so only show this button if that's ready
-//        if (currentBackendFeatureSet.includes('ipadapter') && !currentBackendFeatureSet.includes('facerestorecf')) {
-//            facerestorecfGroup.append(createDiv(`facerestorecf_install_button`, 'keep_group_visible', `<button class="basic-button" onclick="installFeatureById('facerestorecf', 'facerestorecf_install_button')">Install FaceRestoreCF</button>`));
-//        }
-//    }
 });
