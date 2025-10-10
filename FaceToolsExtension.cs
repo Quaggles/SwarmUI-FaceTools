@@ -34,7 +34,7 @@ public class FaceToolsExtension : Extension
         InputFacesOrder,
         SourceFacesOrder;
 
-    public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain, RemoveParamsIfDefault;
+    public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain, FaceRestoreSwappedOnly, RemoveParamsIfDefault;
     
     // Prepopulated with options that should always exist
     public static List<string> FaceRestoreModels = ["none", "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx", "GPEN-BFR-1024.onnx", "GPEN-BFR-2048.onnx"];
@@ -63,7 +63,7 @@ public class FaceToolsExtension : Extension
         
         // Add required custom node as installable feature
         InstallableFeatures.RegisterInstallableFeature(new("ReActor", FeatureId, nodeUrl, "Gourieff", $"This will install the ComfyUI-ReActor node developed by Gourieff from {nodeUrl}.\nDo you wish to install?"));
-        ComfyUISelfStartBackend.ComfyNodeGitPins["ComfyUI-ReActor"] = "d901609a1d5d1942a6b069b2f8f3778fee3a7134";
+        ComfyUISelfStartBackend.ComfyNodeGitPins["ComfyUI-ReActor"] = "d93450bd8086e3ff6af18c14e9001d9bf9a459b7";
         
         // If the old repository is installed remove it as it's unsupported and will pop up Github login windows
         if (Directory.Exists(oldNodePath))
@@ -203,6 +203,15 @@ public class FaceToolsExtension : Extension
             Group: reactorGroup, 
             GetValues: _ => YoloModels, 
             Toggleable: true,
+            OrderPriority: orderCounter++
+        ));
+        FaceRestoreSwappedOnly = T2IParamTypes.Register<bool>(new($"{Prefix}Face Restore Swapped Only",
+            "If enabled will only restore faces that were swapped",
+            "false",
+            IgnoreIf: "false",
+            Group: reactorGroup,
+            FeatureFlag: FeatureId,
+            ChangeWeight: 1,
             OrderPriority: orderCounter++
         ));
         FaceBoost = T2IParamTypes.Register<bool>(new($"{Prefix}Face Boost",
@@ -430,6 +439,7 @@ public class FaceToolsExtension : Extension
                     ["source_faces_index"] = g.UserInput.GetAndRemoveIfDefault(SourceFacesIndex),
                     ["detect_gender_source"] = g.UserInput.GetAndRemoveIfDefault(SourceGenderDetect),
                     ["console_log_level"] = 1,
+                    ["restore_swapped_only"] = g.UserInput.GetAndRemoveIfDefault(FaceRestoreSwappedOnly),
                 }, g.GetStableDynamicID(FaceToolsNodeIndex, 3));
 
                 string reactorNode = g.CreateNode("ReActorFaceSwapOpt", new JObject

@@ -221,6 +221,18 @@ public static class Utils
         return value;
     }
     
+    // Cleans up parameters that are left as default
+    public static bool GetAndRemoveIfDefault(this T2IParamInput input, T2IRegisteredParam<bool> param)
+    {
+        if (input.TryGet(FaceToolsExtension.RemoveParamsIfDefault, out var removeParams) && !removeParams) return input.Get(param);
+        var defaultVal = bool.Parse(param.Type.Default);
+        if (!input.TryGet(param, out var value)) return defaultVal;
+        if (value == defaultVal)
+            if (input.TryRemove(param.Type))
+                Logs.Verbose($"{FaceToolsExtension.ExtensionPrefix}Removed redundant param '{param.Type.ID}' as it was set to the default");
+        return value;
+    }
+    
     public static bool TryRemove(this T2IParamInput input, T2IParamType type)
     {
         if (!input.TryGetRaw(type, out _)) return false;
