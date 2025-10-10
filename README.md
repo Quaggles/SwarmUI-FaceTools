@@ -6,6 +6,14 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 ## Changelog
 <details>
+  <summary>11 October 2025</summary>
+
+* Updated pinned ReActor version from 0.6.0 Alpha1 to latest version 0.6.2 Beta1. If you get errors when trying to use ReActor after updating the extension go to `Server->Backends` and set your ComfyUI backend `UpdateManagedNodes` to `Always Aggressively Update (Force-Update)` this will allow the backend to overwrite any modifications that have been made to the ReActor node and perform the update.
+* Added `Face Restore Swapped Only` parameter, if enabled it will only restore faces that were swapped
+* Added support for hyperswap face swap models, you can select them with advanced parameter `Face Swap Model`, they will be automatically be downloaded to `SwarmUI/dlbackend/comfy/ComfyUI/models/hyperswap`
+
+</details>
+<details>
   <summary>25 May 2025</summary>
 
 <b><i>Make sure you update SwarmUI to at least v0.9.6.1 before updating to this version of FaceTools as it uses new APIs</b></i>
