@@ -38,7 +38,7 @@ public class FaceToolsExtension : Extension
     
     // Prepopulated with options that should always exist
     public static List<string> FaceRestoreModels = ["none", "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx", "GPEN-BFR-1024.onnx", "GPEN-BFR-2048.onnx"];
-    public static List<string> FaceSwapModels = ["inswapper_128.onnx", "reswapper_128.onnx", "reswapper_256.onnx"];
+    public static List<string> FaceSwapModels = ["inswapper_128.onnx", "reswapper_128.onnx", "reswapper_256.onnx", "hyperswap_1a_256.onnx", "hyperswap_1b_256.onnx", "hyperswap_1c_256.onnx"];
     public static List<string> FaceModels = ["none"];
     public static List<string> FaceDetectionModels = ["retinaface_resnet50", "retinaface_mobile0.25", "YOLOv5l", "YOLOv5n"];
     public static List<string> GenderDetectOptions = ["no", "female", "male"];
@@ -299,8 +299,12 @@ public class FaceToolsExtension : Extension
         ));
         FaceSwapModel = T2IParamTypes.Register<string>(new($"{Prefix}Face Swap Model",
             "Model to use for face swap.\n" +
-            "To add new models put them in <i><b>'SwarmUI/dlbackend/comfy/ComfyUI/models/insightface'</b></i>.\n" +
-            "Download from <a href=\"https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models\">https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models</a>",
+            "To add new <b>insightface</b> models put them in <i><b>'SwarmUI/dlbackend/comfy/ComfyUI/models/insightface'</b></i>.\n" +
+            "Download from <a href=\"https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models\">https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models</a>\n\n" +
+            "To add new <b>reswapper</b> models put them in <i><b>'SwarmUI/dlbackend/comfy/ComfyUI/models/reswapper'</b></i>.\n" +
+            "Download from <a href=\"https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models\">https://huggingface.co/datasets/Gourieff/ReActor/tree/main/models</a>\n\n" +
+            "To add new <b>hyperswap</b> models put them in <i><b>'SwarmUI/dlbackend/comfy/ComfyUI/models/hyperswap'</b></i>.\n" +
+            "Download from <a href=\"https://huggingface.co/facefusion/models-3.3.0/tree/main\">https://huggingface.co/facefusion/models-3.3.0/tree/main</a>\n",
             "inswapper_128.onnx",
             GetValues: _ => FaceSwapModels,
             Group: reactorGroup,
@@ -374,6 +378,8 @@ public class FaceToolsExtension : Extension
                     {
                         if (faceSwapModel.StartsWith("reswapper_"))
                             Utils.DownloadOrValidateModel(g, $"models/reswapper/{faceSwapModel}");
+                        else if (faceSwapModel.StartsWith("hyperswap_"))
+                            Utils.DownloadOrValidateModel(g, $"models/hyperswap/{faceSwapModel}");
                         else
                             Utils.DownloadOrValidateModel(g, $"models/insightface/{faceSwapModel}");
                         Utils.DownloadOrValidateModel(g, $"models/insightface/models/buffalo_l/1k3d68.onnx");

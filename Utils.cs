@@ -23,6 +23,9 @@ public static class Utils
         {"models/insightface/inswapper_128.onnx", ("e4a3f08c753cb72d04e10aa0f7dbe3deebbf39567d4ead6dce08e98aa49e16af", "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx") },
         {"models/reswapper/reswapper_128.onnx", ("744eaa30a6a3bdeb693c3c127b2c9ce6f2ea763f245b92ea71ea98b3a38b0fec", "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/reswapper_128.onnx") },
         {"models/reswapper/reswapper_256.onnx", ("42351d48d8cede1da70e3ea9f552613ead95f3e7ad977c60862ca0a3905eca9e", "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/reswapper_256.onnx") },
+        {"models/hyperswap/hyperswap_1a_256.onnx", ("c0e98a8a03a238f461ed3d2570e426b49f46745ee400854a60dceeb70c246add", "https://huggingface.co/facefusion/models-3.3.0/resolve/main/hyperswap_1a_256.onnx?download=true") },
+        {"models/hyperswap/hyperswap_1b_256.onnx", ("5124031789c42f71b9558fb71954ef7aedb6da7ed9fac79293e23c61a792a73e", "https://huggingface.co/facefusion/models-3.3.0/resolve/main/hyperswap_1b_256.onnx?download=true") },
+        {"models/hyperswap/hyperswap_1c_256.onnx", ("5528c2d76fe9986c99d829278987ef9f3a630cb606db7628d02b57b330f406a5", "https://huggingface.co/facefusion/models-3.3.0/resolve/main/hyperswap_1c_256.onnx?download=true") },
         {"models/insightface/models/buffalo_l/1k3d68.onnx", ("df5c06b8a0c12e422b2ed8947b8869faa4105387f199c477af038aa01f9a45cc", null) }, // These are hosted in a zip so the user will have to replace these
         {"models/insightface/models/buffalo_l/2d106det.onnx", ("f001b856447c413801ef5c42091ed0cd516fcd21f2d6b79635b1e733a7109dbf", null) },
         {"models/insightface/models/buffalo_l/det_10g.onnx", ("5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91", null) },
