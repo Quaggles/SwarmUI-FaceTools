@@ -68,9 +68,9 @@ public static class Utils
             return;
         }
         
-        foreach (var (id, data) in Program.Backends.T2IBackends)
+        foreach (var (id, data) in Program.Backends.AllBackends)
         {
-            if (data.Backend.Status is BackendStatus.DISABLED or BackendStatus.ERRORED or BackendStatus.LOADING || data.Backend is not ComfyUISelfStartBackend backend) continue;
+            if (data.AbstractBackend.Status is BackendStatus.DISABLED or BackendStatus.ERRORED or BackendStatus.LOADING || data.AbstractBackend is not ComfyUISelfStartBackend backend) continue;
             var absolutePath = Utilities.CombinePathWithAbsolute(Environment.CurrentDirectory, backend.ComfyPathBase, relativePath);
 
             // If the file exists and a URL is known then lets download it
