@@ -34,7 +34,7 @@ public class FaceToolsExtension : Extension
         InputFacesOrder,
         SourceFacesOrder;
 
-    public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain, FaceRestoreSwappedOnly, RemoveParamsIfDefault;
+    public static T2IRegisteredParam<bool> FaceBoost, FaceBoostRestoreAfterMain, FaceRestoreSwappedOnly, RemoveParamsIfDefault, UnloadReactorModels;
     
     // Prepopulated with options that should always exist
     public static List<string> FaceRestoreModels = ["none", "codeformer-v0.1.0.pth", "GFPGANv1.3.pth", "GFPGANv1.4.pth", "GPEN-BFR-512.onnx", "GPEN-BFR-1024.onnx", "GPEN-BFR-2048.onnx"];
@@ -312,6 +312,15 @@ public class FaceToolsExtension : Extension
             IsAdvanced: true,
             OrderPriority: orderCounter++
         ));
+        UnloadReactorModels = T2IParamTypes.Register<bool>(new($"{Prefix}Unload Reactor Models",
+            "Unloads the ReActor models from VRAM after generation, frees VRAM between generations but the ReActor process will take longer",
+            "false",
+            IgnoreIf: "false",
+            Group: reactorGroup,
+            FeatureFlag: FeatureId,
+            IsAdvanced: true,
+            OrderPriority: orderCounter++
+        ));
         RemoveParamsIfDefault = T2IParamTypes.Register<bool>(new($"{Prefix}Remove Params If Default",
             "Removes certain parameters if they use the default value for a cleaner parameter list in the UI",
             "true",
@@ -518,7 +527,16 @@ public class FaceToolsExtension : Extension
                 reactorOutput = [maskNode, 0];
             }
 
-            g.CurrentMedia = new WGNodeData(reactorOutput, g, WGNodeData.DT_IMAGE);
+            if (g.UserInput.TryGet(UnloadReactorModels, out bool unloadModels) && unloadModels)
+            {
+                string unloadModelsNode = g.CreateNode("ReActorUnload", new JObject
+                {
+                    ["trigger"] = reactorOutput,
+                }, g.GetStableDynamicID(FaceToolsNodeIndex, 9));
+                reactorOutput = [unloadModelsNode, 0];
+            }
+
+            g.CurrentMedia = new WGNodeData(reactorOutput, g, WGNodeData.DT_IMAGE, g.CurrentCompat());
         }, StepInjectPriority);
     }
 }
