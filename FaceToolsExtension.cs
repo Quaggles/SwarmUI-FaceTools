@@ -399,10 +399,10 @@ public class FaceToolsExtension : Extension
             JArray reactorOutput = null;
             if (hasImage || hasModel) // If user passed in an image/model do face swap
             {
-                string sourceNode = null;
+                JArray sourceNode = null;
                 if (hasImage)
                 {
-                    sourceNode = g.CreateLoadImageNode(inputImage, $"${{{FaceImage.Type.ID}}}", false, g.GetStableDynamicID(FaceToolsNodeIndex, 0));
+                    sourceNode = g.LoadImage(inputImage, $"${{{FaceImage.Type.ID}}}", false, g.GetStableDynamicID(FaceToolsNodeIndex, 0)).Path;
                     // Image has priority over model if both provided
                     hasModel = false;
                     if (g.UserInput.TryRemove(FaceModel.Type))
@@ -411,10 +411,11 @@ public class FaceToolsExtension : Extension
 
                 if (hasModel)
                 {
-                    sourceNode = g.CreateNode("ReActorLoadFaceModel", new JObject
+                    string faceLoadNode = g.CreateNode("ReActorLoadFaceModel", new JObject
                     {
                         ["face_model"] = faceModel
                     }, g.GetStableDynamicID(FaceToolsNodeIndex, 1));
+                    sourceNode = new JArray { faceLoadNode, 0 };
                 }
 
                 string faceBoostNode = null;
@@ -450,10 +451,10 @@ public class FaceToolsExtension : Extension
 
                 string reactorNode = g.CreateNode("ReActorFaceSwapOpt", new JObject
                 {
-                    ["input_image"] = g.FinalImageOut,
+                    ["input_image"] = g.CurrentMedia.AsRawImage(g.CurrentVae).Path,
                     ["options"] = new JArray { optionsNode, 0 },
-                    ["source_image"] = hasImage ? new JArray { sourceNode, 0 } : null,
-                    ["face_model"] = hasModel ? new JArray { sourceNode, 0 } : null,
+                    ["source_image"] = hasImage ? sourceNode : null,
+                    ["face_model"] = hasModel ? sourceNode : null,
                     ["face_boost"] = string.IsNullOrEmpty(faceBoostNode) ? null : new JArray { faceBoostNode, 0 },
                     ["enabled"] = true,
                     ["swap_model"] = faceSwapModel,
@@ -468,7 +469,7 @@ public class FaceToolsExtension : Extension
             {
                 string restoreFace = g.CreateNode("ReActorRestoreFace", new JObject
                 {
-                    ["image"] = g.FinalImageOut,
+                    ["image"] = g.CurrentMedia.AsRawImage(g.CurrentVae).Path,
                     ["facedetection"] = faceDetectionModel,
                     ["model"] = faceRestoreModel,
                     ["visibility"] = faceRestoreVisibility,
@@ -501,13 +502,13 @@ public class FaceToolsExtension : Extension
             {
                 string swarmYoloMask = g.CreateNode("SwarmYoloDetection", new JObject
                 {
-                    ["image"] = g.FinalImageOut,
+                    ["image"] = g.CurrentMedia.AsRawImage(g.CurrentVae).Path,
                     ["model_name"] = faceMaskModel,
                     ["index"] = 0,
                 }, g.GetStableDynamicID(FaceToolsNodeIndex, 7));
                 string maskNode = g.CreateNode("ImageCompositeMasked", new JObject
                 {
-                    ["destination"] = g.FinalImageOut,
+                    ["destination"] = g.CurrentMedia.AsRawImage(g.CurrentVae).Path,
                     ["source"] = reactorOutput,
                     ["mask"] = new JArray { swarmYoloMask, 0 },
                     ["x"] = 0,
@@ -517,7 +518,7 @@ public class FaceToolsExtension : Extension
                 reactorOutput = [maskNode, 0];
             }
 
-            g.FinalImageOut = reactorOutput;
+            g.CurrentMedia = new WGNodeData(reactorOutput, g, WGNodeData.DT_IMAGE);
         }, StepInjectPriority);
     }
 }
