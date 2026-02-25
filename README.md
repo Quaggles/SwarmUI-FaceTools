@@ -6,6 +6,13 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 ## Changelog
 <details>
+  <summary>25 February 2026</summary>
+
+* Replaced obsolete code to be compatible with SwarmUI's new `WGNodeData` workflow
+* Added Unload ReActor Models advanced toggle to free VRAM
+
+</details>
+<details>
   <summary>11 October 2025</summary>
 
 * Updated pinned ReActor version from 0.6.0 Alpha1 to latest version 0.6.2 Beta1. If you get errors when trying to use ReActor after updating the extension go to `Server->Backends` and set your ComfyUI backend `UpdateManagedNodes` to `Always Aggressively Update (Force-Update)` this will allow the backend to overwrite any modifications that have been made to the ReActor node and perform the update.
