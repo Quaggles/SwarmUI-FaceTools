@@ -63,7 +63,7 @@ public class FaceToolsExtension : Extension
         
         // Add required custom node as installable feature
         InstallableFeatures.RegisterInstallableFeature(new("ReActor", FeatureId, nodeUrl, "Gourieff", $"This will install the ComfyUI-ReActor node developed by Gourieff from {nodeUrl}.\nDo you wish to install?"));
-        ComfyUISelfStartBackend.ComfyNodeGitPins["ComfyUI-ReActor"] = "d93450bd8086e3ff6af18c14e9001d9bf9a459b7";
+        ComfyUISelfStartBackend.ComfyNodeGitPins["ComfyUI-ReActor"] = "a7628ccdfffbae4a9ae5011da5d5e6f7309e6c24";
         
         // If the old repository is installed remove it as it's unsupported and will pop up Github login windows
         if (Directory.Exists(oldNodePath))
