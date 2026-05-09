@@ -6,6 +6,12 @@ A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI/) extension that adds pa
 
 ## Changelog
 <details>
+  <summary>9 May 2026</summary>
+
+* Update to ReActor 0.7.0-a1 (No InsightFace required anymore)
+
+</details>
+<details>
   <summary>25 February 2026</summary>
 
 * Replaced obsolete code to be compatible with SwarmUI's new `WGNodeData` workflow
