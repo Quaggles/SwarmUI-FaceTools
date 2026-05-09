@@ -104,13 +104,10 @@ Technical details:
 1. In SwarmUI go to the `Server->Extensions` tab
 2. Find FaceTools in the list and click the 'Install' button
 3. Refresh the page and go back to the generate tab, if you see the parameters then the required ComfyUI dependencies are installed and you can start using the extension, otherwise continue below.
-4. If dependencies are not installed buttons will be shown in the parameter group to install them. Install IP Adapter first and once the backend has restarted install ReActor.
-
-![image](https://github.com/user-attachments/assets/5d69ac34-2d2e-4eb2-8b62-c22f189b15e0)
-
-6. After ReActor installs it automatically starts downloading some of the models, you can monitor the progress by going to the `Server->Logs` tab and setting the view to `Debug`.
-7. You should be good to go, check the [Usage section](#usage) for tips
-8. If you run into issues (Such as not being able to see the parameter group) check the [Troubleshooting section](#troubleshooting)
+4. Click the 'Install Reactor' button in the ReActor parameter group
+5. After ReActor installs it automatically starts downloading some of the models, you can monitor the progress by going to the `Server->Logs` tab and setting the view to `Debug`.
+6. You should be good to go, check the [Usage section](#usage) for tips
+7. If you run into issues (Such as not being able to see the parameter group) check the [Troubleshooting section](#troubleshooting)
 
 ## Installation (Manual)
 
@@ -172,17 +169,6 @@ This is not a bug, ReActor returns a black image when the NSFW detector detects 
 ### The ReActor parameter group appears when SwarmUI is started and then disappears when the backend loads
 
 This occurs when ReActor fails to import in the ComfyUI backend, go to Server->Logs and set the view to `Debug` to see the error, if you can't solve it yourself check the [SwarmUI Discord](https://discord.gg/swarmui-1243166023859961988) (Look in the `Extensions->FaceTools` thread) or the [ReActor Github](https://github.com/Gourieff/ComfyUI-ReActor).
-
-### ModuleNotFoundError: No module named 'insightface'
-
-SwarmUI should install a precompiled insightface wheel when you click the 'Install IP Adapter' button but if that didn't work you can compile it manually with the following steps:
-
-1. Install Visual Studio 2022 Community version OR only VS C++ Build Tools and select "Desktop Development with C++" under "Workloads -> Desktop & Mobile"
-2. Find the python version of your ComfyUI backend by looking at the file properties of `SwarmUI\dlbackend\comfy\python_embeded\python.exe`, for this example I have Python 3.12.7
-3. Install the exact same python version from https://www.python.org/downloads/ and manually copy over the `include` and `libs` folders from `C:\Users\<User>\AppData\Local\Programs\Python\Python312` to  `SwarmUI\dlbackend\comfy\python_embeded`
-4. Start a terminal/cmd in `SwarmUI/dlbackend/comfy/python_embeded`
-5. Run the command `python.exe -m pip install insightface`, if using Powershell you might need to prepend commands with `./` to ensure it doesn't find your global python install on PATH
-6. If all goes well this should compile insightface successfully and you can continue
 
 ### An error occurs when clicking 'Generate' when using ReActor
 
